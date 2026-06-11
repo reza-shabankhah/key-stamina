@@ -1,4 +1,4 @@
-const topPasswords = [
+let topPasswords = [
 "123456",
 "123456789",
 "qwerty",
