@@ -6,6 +6,9 @@ dist/
 build/
 out/
 
+# Build artifacts
+/dist
+
 # Local env files
 .env
 .env.local
@@ -38,6 +41,3 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Project-specific local brainstorms
-UX
-UX.txt
