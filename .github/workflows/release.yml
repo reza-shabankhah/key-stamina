@@ -1,0 +1,29 @@
+name: Generate Portable HTML
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Packing Script
+        run: node scripts/pack.js
+
+      - name: Upload Portable HTML to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/KeyStamina-Portable.html
