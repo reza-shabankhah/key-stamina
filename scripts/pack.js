@@ -82,7 +82,7 @@ async function pack() {
     for (const r of cssReplacements) html = html.split(r.original).join(r.replacement);
     
     // Inline images and icons
-    const imgRegex = /<(img|link)([^>]*(?:src|href)="(.*?)".*?)\/?>/g;
+    const imgRegex = /<(img|link)([^>]*(?:src|href)="(.*?)"[^>]*)\/?>/gi;
     const imgReplacements = [];
     while ((match = imgRegex.exec(html)) !== null) {
         const tag = match[1];
