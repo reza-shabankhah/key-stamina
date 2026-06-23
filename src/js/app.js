@@ -48,14 +48,40 @@ function initPassphraseInput() {
   if (copyBtn) {
     copyBtn.addEventListener("click", () => {
       if (!textarea.value) return;
-      navigator.clipboard.writeText(textarea.value).then(() => {
+
+      const onSuccess = () => {
         copyBtn.textContent = "Copied!";
         copyBtn.disabled = true;
         onNextInputChange.push(() => {
           copyBtn.textContent = "Copy";
           copyBtn.disabled = !textarea.value;
         });
-      });
+      };
+
+      const fallbackCopy = () => {
+        const el = document.createElement("textarea");
+        el.value = textarea.value;
+        el.style.position = "fixed";
+        el.style.left = "-9999px";
+        el.style.top = "0";
+        document.body.appendChild(el);
+        el.focus();
+        el.select();
+        try {
+          document.execCommand("copy");
+        } catch (e) {}
+        document.body.removeChild(el);
+        onSuccess();
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard
+          .writeText(textarea.value)
+          .then(onSuccess)
+          .catch(fallbackCopy);
+      } else {
+        fallbackCopy();
+      }
     });
   }
 
@@ -107,7 +133,6 @@ function initBorderMaskHandling() {
 
   if (!textarea || !borderBox || !labelCore) return;
 
-  // Visual border mask gaps (pixels)
   const visualLeftGap = 4.0;
   const visualRightGap = 2.0;
 

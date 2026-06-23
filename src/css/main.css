@@ -450,7 +450,9 @@ body {
   overflow: hidden;
   max-width: 4rem; /* Wide enough for "Type " */
   opacity: 1;
-  transition: opacity var(--transition-normal), max-width var(--transition-normal);
+  transition:
+    opacity var(--transition-normal),
+    max-width var(--transition-normal);
   white-space: pre;
 }
 
