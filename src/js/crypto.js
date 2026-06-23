@@ -25,15 +25,3 @@ function genPasscode(length, charset) {
   for (let i = 0; i < length; i++) passcode += charset[randomInt(len)];
   return passcode;
 }
-
-let compromisedSet = null;
-
-function isCompromised(password) {
-  if (!password) return false;
-  if (!compromisedSet) {
-    if (typeof topPasswords === "undefined") throw new Error("topPasswords missing");
-    compromisedSet = new Set(topPasswords);
-    topPasswords = null; // Free array to allow GC
-  }
-  return compromisedSet.has(password);
-}
