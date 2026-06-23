@@ -8,6 +8,8 @@ function flushInputResets() {
 initPassphraseInput();
 initTargetTimeValueInput();
 initBorderMaskHandling();
+initMobileAutoScroll();
+initTooltips();
 
 function initPassphraseInput() {
   const textarea = document.getElementById("passphrase-input");
@@ -99,18 +101,30 @@ function initTargetTimeValueInput() {
 function initBorderMaskHandling() {
   const textarea = document.getElementById("passphrase-input");
   const borderBox = document.querySelector(".passphrase-border-box");
-  const label = document.querySelector(".floating-label");
+  const labelCore = document.querySelector(".label-core");
+  const charCounter = document.getElementById("char-counter");
   const clearBtn = document.getElementById("clear-input-btn");
 
-  if (!textarea || !borderBox || !label) return;
+  if (!textarea || !borderBox || !labelCore) return;
 
-  const gap = 1.5;
-  const labelLeft = 15.2; // mirrors 0.95rem left offset from CSS
+  // Visual border mask gaps (pixels)
+  const visualLeftGap = 4.0;
+  const visualRightGap = 2.0;
+
+  const labelLeft = 15.2; // Matches 0.95rem in CSS
+  const leftPadding = 2.4; // Scaled 0.2rem CSS padding (0.75)
 
   const updateMask = () => {
-    const maskWidth = label.offsetWidth * 0.75 + gap * 2;
+    const counterWidth =
+      charCounter && charCounter.textContent ? charCounter.offsetWidth : 0;
+    const scaledTextWidth = (labelCore.offsetWidth + counterWidth) * 0.75;
+
+    const textInkLeft = labelLeft + leftPadding;
+    const maskLeft = textInkLeft - visualLeftGap;
+    const maskWidth = visualLeftGap + scaledTextWidth + visualRightGap;
+
     borderBox.style.setProperty("--mask-width", `${maskWidth}px`);
-    borderBox.style.setProperty("--mask-left", `${labelLeft - gap}px`);
+    borderBox.style.setProperty("--mask-left", `${maskLeft}px`);
   };
 
   updateMask();
@@ -119,4 +133,37 @@ function initBorderMaskHandling() {
   textarea.addEventListener("blur", updateMask);
 
   if (clearBtn) clearBtn.addEventListener("click", updateMask);
+}
+
+function initMobileAutoScroll() {
+  const textarea = document.getElementById("passphrase-input");
+  const card = document.querySelector(".passphrase-card");
+
+  if (!textarea || !card) return;
+
+  textarea.addEventListener("focus", () => {
+    if (window.innerWidth <= 768) {
+      setTimeout(() => {
+        card.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 600);
+    }
+  });
+}
+
+function initTooltips() {
+  document.querySelectorAll(".clickable-title").forEach((title) => {
+    title.addEventListener("click", () => {
+      const container = title.parentElement;
+      if (container) {
+        const trigger = container.querySelector(".tooltip-trigger");
+        if (trigger) {
+          if (document.activeElement === trigger) {
+            trigger.blur();
+          } else {
+            trigger.focus();
+          }
+        }
+      }
+    });
+  });
 }

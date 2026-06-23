@@ -168,6 +168,12 @@ body {
   white-space: nowrap;
 }
 
+.clickable-title {
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .title-with-tooltip,
 .label-with-tooltip {
   display: inline-flex;
@@ -330,6 +336,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  scroll-margin-top: 4px;
 }
 
 .passphrase-border-box {
@@ -434,6 +441,23 @@ body {
   padding: 0 0.2rem;
   border-radius: 4px;
   z-index: 4; /* Above ::before border */
+  display: flex;
+  align-items: center;
+}
+
+.label-prefix {
+  display: inline-block;
+  overflow: hidden;
+  max-width: 4rem; /* Wide enough for "Type " */
+  opacity: 1;
+  transition: opacity var(--transition-normal), max-width var(--transition-normal);
+  white-space: pre;
+}
+
+.passphrase-textarea:focus ~ .floating-label .label-prefix,
+.passphrase-textarea:not(:placeholder-shown) ~ .floating-label .label-prefix {
+  opacity: 0;
+  max-width: 0;
 }
 
 .passphrase-textarea:focus ~ .floating-label,
