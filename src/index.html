@@ -10,20 +10,19 @@
     <meta name="color-scheme" content="dark" />
     <title>KeyStamina - Passphrase Strength &amp; Entropy Analyzer</title>
 
-    <link rel="stylesheet" href="vendor/katex/katex.min.css" />
     <link rel="stylesheet" href="css/main.css" />
 
     <link
       rel="icon"
       type="image/png"
       sizes="32x32"
-      href="assets/icons/favicon-32x32.png"
+      href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAFhElEQVRYha1Wa2wUVRT+zrzubNvd6ZZIW2obsPIoDxWjFpEGTYySJqCGH0ZCJCFCDGqQGE2MGIUYEDWK/CAxBjVqNFEJBvARjQ/kFVkQEii0vCJUdrZCYbvtdndmZ+b4o+126e52uoaTTDJzzne+893H3HsIJVrwn+A4WbGXMmMRgImD7ovE2OW51ieJelwthY9KAYei+lIibzNA4wAkAD4JkAZgOgAdQA8Tr0rU2F+Uwju24qZYZZjCqzRFNBTTlqAN2lCsOobySlNfZph6t2EKNqL6yhtavCKqNRmmsA1TXAxHAw3FcOFooMEwRcwwRaayS739hgkwTP1LwxQcMkWrH7Yypj1imIIrY9rnN6Y6QzJM7YphigvgMewZhmSY4rJh6t1jwUt+gKpooG5w0x0GgYf84WigIRTTnqg09SeNLv2WbALBA+gXgKuCl4JVfvz+I2qDFg7rzQ6TJ5N3NxPuA+FeMOpyYQxECbSfifcB0iEASFSnDg0IKlFAqBNVkMU9EtEcBrcAaAZQ7iv2eksCOESgfR74oJS2DsYnIe4rwIiJHRg4ZIouD8e8fzM/8jmvix0AkGpIVRdQI1VLN40iyAVoe09t+vFcp5LPjqkFi7twrc3OQWubO4770ARgPNVQRG5Ev/M3KLWek6SiWzyvXBUr5TmQ8jhkgGeNpM0XUEj6Oe5MttpJTmFerl9bJKX0tcr8oW9nr3eif7UTsN5zzlTs1DRpKk3y4/b9C7wOvtD3oK1zCtNGxuzP3Oq+++2D/auc390j3K7MlZokHTbbCPYusCvco9zhxz/qDHA/kr2tNsNFwbXlFKa65xnueReZ3S6goBOE8aGIpltb3ON9i+1JoZMiTTr0YjVGnYH+1XYEmeyN528O6uFBQAL09cp8uZpiqRecw6OlFN/paaSdn3j2aMlyHf1JtRS5zuliQnJxph0AApvVYGa3Ox02XAAgDB9kvgKcX72TYBiFYlRHESrDKeVRydYWSikqQwfVUHak7jlu5pjXJTdTEySkMvu9NgBg5B9KRQW4Ea+3WEyZIyVDx8REdYncqC6Tbw0eFfXKfCmZA5GTTzmn05ucvZBhu4eyXHkCim5CL1ksAmS+dWekJ+Cw/qLSAgDW+86+zFfudf+428F1nunF4SLoJQaWAFzCEsgNpBaLBV5VzsqzpVDmay+S2e5FpFlSKLBJOZuLKftA7Qsd0e6kMHUqk2mgeSlwL+TNAAPdBEB5SKrHW4UFpNY5M8Go0F9WDgBAeo1zF4DUsHpcVlukaUgjxd08WZkrXQEAIvT7CiDgBIB58hSqpyBOcS+a8hQwggCQ3ujcMZyGsqGweFpuh4qW9GZnL5UjJE2hge7Iw5GRVHlLQIQfht4DG1Sr8BxkrRwjb0lCQiyXZvA1umZtdSfrG9TsqF0JPxcYcN7oFCMm2gE0AkDfY/Y+9wjPy8ONJAqiTTyn9Fgfujr3cJiCFJcnIl6+Q3tgEHK6p8Zq8usPAADhmFhomIINU7DRKRx5Bh2ACh75yLfR3rJP1WPBv9TYEL5il3YcKtLyLPrDuCQyg34vFBUP+xbONcMUb2dFRIUnnpH3QEM8V4B4Vt5jmIJDJ8TlsneViDyF9kNDt1gj/2ZEhZfNN/U3i85cUQUMCsW0jwm0LOvqRdx6xzlq7/QMvsqNYGggOGAQhem0tkhKiJeU2RTMOUEZ23pqrRW5/eTYBAyLWEug11Fgw3IPktAAChRs15hAb8Rr0q8VK+4vYNBCpmgl4CMA1WPBE2B6wIpErfWdH9a3IQGARK31PWyriRhbANijQDMAtnqONXMsxQfFlmZVlwL1ruytBWM5hg8yBugblvmVxHjrTCl8JQsYsmBUmyaRtA4AyHU3xm/OHPs/PP8B8iE27qLYlaMAAAAASUVORK5CYII="
     />
     <link
       rel="icon"
       type="image/png"
       sizes="16x16"
-      href="assets/icons/favicon-16x16.png"
+      href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAACMklEQVQ4jXVSy2oUQRQ9t/pR3UnP9DhGSUTFJ0QkuhADUYjBtegHuHCTbMSFWxchIBKJgki2rgTBD5AEJuhGzShujCgxJAYXYvf4iCYzTib9qLquHOeVAwWXw7mnzr1VhA7o/t7da6bpLQDDIBABBaXsicreylqrVrQSewJ0WSp9RkQvN/qi/o3eqF8TzwsjKeAznE4XNsEPnLFcKKdb+WxJ3suFzpVW3mxzIP2bCfN+yRkF6zMMCCLxAqyLYE7b5P+KXCCva8J5AoYA9EBBqXe8CgDGAB2ABRvgNQYVQXha7o2mmwz8UP4A0IMESfVqPJ/O8QnyEDrj5p/0DdegAfe2OUguugD83OiLdrUvkcHl4XghLfAIGHmu4ODWzdRDDdAftVm9GL8FQze2NBnED9Qr/sqn64SBTa6iL5lRI4gh5A3TjR+q4vYGj1V9JPKw6I6bK+64uUQeFtUqD6ECncyoCPifovkVIhj1WsEQh8kDAVAQACh5ratchmw0aEwQiLMiqq+jhiObY4m7OZq4XMNRcvBJjhqHxHGhGGj7kfADZzK7LNfhoAQL3HhoBz4Yx6hoDNLz7JJc90M51ZaAoq07lEE5U7Br5GIZACiPBa9ol9y7Vgwb3DVl7SMfJSGjyXpfY4pMYPcLollo7E9m9ftkTldAIOuc8KxLYgAGVtnAhfLuaKWjAQBkvyAvTPs+gy43JGQCPxJ2fO3XTpTb5u+E3DfrZC6UT/xQzviBdWo73V+0dN/0q4LlxgAAAABJRU5ErkJggg=="
     />
   </head>
   <body>
@@ -351,12 +350,6 @@
       </footer>
     </div>
 
-    <script src="js/diceware-list.js" defer></script>
-    <script src="vendor/hash-wasm/md4.umd.min.js" defer></script>
-    <script src="vendor/hash-wasm/bcrypt.umd.min.js" defer></script>
-    <script src="vendor/hash-wasm/argon2.umd.min.js" defer></script>
-    <script src="vendor/katex/katex.min.js" defer></script>
-    <script src="js/crypto.js" defer></script>
-    <script src="js/app.js" defer></script>
+    <script type="module" src="./ts/app.ts"></script>
   </body>
 </html>

@@ -6,9 +6,6 @@ dist/
 build/
 out/
 
-# Build artifacts
-/dist
-
 # Local env files
 .env
 .env.local
@@ -41,3 +38,5 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Vite cache
+.vite/

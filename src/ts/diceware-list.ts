@@ -1,4 +1,4 @@
-const dicewareList = [
+export const dicewareList = [
   "abacus",
   "abdomen",
   "abdominal",

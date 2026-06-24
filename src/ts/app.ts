@@ -1,8 +1,13 @@
-// One-shot callbacks, flushed on next input.
-const onNextInputChange = [];
+import "katex/dist/katex.min.css";
 
-function flushInputResets() {
-  while (onNextInputChange.length) onNextInputChange.pop()();
+// One-shot callbacks, flushed on next input.
+const onNextInputChange: Array<() => void> = [];
+
+function flushInputResets(): void {
+  while (onNextInputChange.length) {
+    const cb = onNextInputChange.pop();
+    if (cb) cb();
+  }
 }
 
 initPassphraseInput();
@@ -11,11 +16,15 @@ initBorderMaskHandling();
 initMobileAutoScroll();
 initTooltips();
 
-function initPassphraseInput() {
-  const textarea = document.getElementById("passphrase-input");
+function initPassphraseInput(): void {
+  const textarea = document.getElementById(
+    "passphrase-input",
+  ) as HTMLTextAreaElement | null;
   const counter = document.getElementById("char-counter");
   const clearBtn = document.getElementById("clear-input-btn");
-  const copyBtn = document.getElementById("copy-btn");
+  const copyBtn = document.getElementById(
+    "copy-btn",
+  ) as HTMLButtonElement | null;
 
   if (!textarea) return;
 
@@ -24,7 +33,7 @@ function initPassphraseInput() {
     textarea.style.height = textarea.scrollHeight + "px";
   };
 
-  textarea.addEventListener("keydown", (e) => {
+  textarea.addEventListener("keydown", (e: KeyboardEvent) => {
     if (e.key === "Enter") e.preventDefault();
   });
 
@@ -38,9 +47,9 @@ function initPassphraseInput() {
     const len = textarea.value.length;
     const hasContent = len > 0;
 
-    counter.textContent = hasContent ? ` (${len})` : "";
-    clearBtn.hidden = !hasContent;
-    copyBtn.disabled = !hasContent;
+    if (counter) counter.textContent = hasContent ? ` (${len})` : "";
+    if (clearBtn) clearBtn.hidden = !hasContent;
+    if (copyBtn) copyBtn.disabled = !hasContent;
 
     adjustHeight();
   });
@@ -89,21 +98,25 @@ function initPassphraseInput() {
     clearBtn.addEventListener("click", () => {
       textarea.value = "";
       textarea.style.height = "28px";
-      counter.textContent = "";
+      if (counter) counter.textContent = "";
       clearBtn.hidden = true;
-      copyBtn.textContent = "Copy";
-      copyBtn.disabled = true;
+      if (copyBtn) {
+        copyBtn.textContent = "Copy";
+        copyBtn.disabled = true;
+      }
       onNextInputChange.length = 0;
       textarea.focus();
     });
   }
 }
 
-function initTargetTimeValueInput() {
-  const input = document.getElementById("target-time-value");
+function initTargetTimeValueInput(): void {
+  const input = document.getElementById(
+    "target-time-value",
+  ) as HTMLInputElement | null;
   if (!input) return;
 
-  input.addEventListener("beforeinput", (e) => {
+  input.addEventListener("beforeinput", (e: InputEvent) => {
     if (e.data && !/^[0-9]+$/.test(e.data)) e.preventDefault();
   });
 
@@ -124,10 +137,12 @@ function initTargetTimeValueInput() {
   });
 }
 
-function initBorderMaskHandling() {
+function initBorderMaskHandling(): void {
   const textarea = document.getElementById("passphrase-input");
-  const borderBox = document.querySelector(".passphrase-border-box");
-  const labelCore = document.querySelector(".label-core");
+  const borderBox = document.querySelector(
+    ".passphrase-border-box",
+  ) as HTMLElement | null;
+  const labelCore = document.querySelector(".label-core") as HTMLElement | null;
   const charCounter = document.getElementById("char-counter");
   const clearBtn = document.getElementById("clear-input-btn");
 
@@ -160,7 +175,7 @@ function initBorderMaskHandling() {
   if (clearBtn) clearBtn.addEventListener("click", updateMask);
 }
 
-function initMobileAutoScroll() {
+function initMobileAutoScroll(): void {
   const textarea = document.getElementById("passphrase-input");
   const card = document.querySelector(".passphrase-card");
 
@@ -175,12 +190,14 @@ function initMobileAutoScroll() {
   });
 }
 
-function initTooltips() {
+function initTooltips(): void {
   document.querySelectorAll(".clickable-title").forEach((title) => {
     title.addEventListener("click", () => {
       const container = title.parentElement;
       if (container) {
-        const trigger = container.querySelector(".tooltip-trigger");
+        const trigger = container.querySelector(
+          ".tooltip-trigger",
+        ) as HTMLElement | null;
         if (trigger) {
           if (document.activeElement === trigger) {
             trigger.blur();
