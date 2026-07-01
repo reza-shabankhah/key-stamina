@@ -1,14 +1,8 @@
 import "katex/dist/katex.min.css";
-import { zxcvbn, parseZxcvbnSequence, calculateCrackTime, formatTime, Algorithm, HardwareTier } from "./crypto";
+import { evaluatePassword, calculateCrackTime, formatTime, Algorithm, HardwareTier } from "./crypto";
 
-const onNextInputChange: (() => void)[] = [];
-
-function flushInputResets(): void {
-  while (onNextInputChange.length) {
-    const cb = onNextInputChange.pop();
-    if (cb) cb();
-  }
-}
+let latestInputJobId = 0;
+let evaluateTimeout: number | undefined;
 
 initPassphraseInput();
 initTargetTimeValueInput();
@@ -29,9 +23,13 @@ function initPassphraseInput(): void {
 
   if (!textarea) return;
 
+  let heightRaf: number;
   const adjustHeight = () => {
-    textarea.style.height = "auto";
-    textarea.style.height = textarea.scrollHeight + "px";
+    cancelAnimationFrame(heightRaf);
+    heightRaf = requestAnimationFrame(() => {
+      textarea.style.height = "auto";
+      textarea.style.height = textarea.scrollHeight + "px";
+    });
   };
 
   window.addEventListener("resize", adjustHeight);
@@ -45,8 +43,6 @@ function initPassphraseInput(): void {
     if (/[\r\n]/.test(textarea.value)) {
       textarea.value = textarea.value.replace(/[\r\n]/g, "");
     }
-
-    flushInputResets();
 
     const len = textarea.value.length;
     const hasContent = len > 0;
@@ -75,12 +71,18 @@ function initPassphraseInput(): void {
     }
 
     if (hasContent && !hasInvalidChar) {
-      const result = zxcvbn.check(textarea.value);
-      console.log("zxcvbn check:", result);
-      console.log("parsed patterns:", parseZxcvbnSequence(result.sequence));
-      updateCrackTimes(result.guesses);
-      updateResistanceBadge(result.score);
+      clearTimeout(evaluateTimeout);
+      evaluateTimeout = window.setTimeout(() => {
+        const currentJobId = ++latestInputJobId;
+        evaluatePassword(textarea.value).then(result => {
+          if (!result || currentJobId !== latestInputJobId) return; // Drop stale results
+          updateCrackTimes(result.guesses);
+          updateResistanceBadge(result.score);
+        });
+      }, 150);
     } else {
+      clearTimeout(evaluateTimeout);
+      latestInputJobId++; // Invalidate pending jobs
       resetCrackTimes();
       resetResistanceBadge();
     }
@@ -99,10 +101,6 @@ function initPassphraseInput(): void {
       const onSuccess = () => {
         copyBtn.textContent = "Copied!";
         copyBtn.disabled = true;
-        onNextInputChange.push(() => {
-          copyBtn.textContent = "Copy";
-          copyBtn.disabled = !textarea.value;
-        });
       };
 
       const fallbackCopy = () => {
@@ -143,7 +141,6 @@ function initPassphraseInput(): void {
         copyBtn.disabled = true;
         copyBtn.classList.remove("btn-unsupported");
       }
-      onNextInputChange.length = 0;
       resetCrackTimes();
       resetResistanceBadge();
       textarea.focus();
@@ -195,17 +192,21 @@ function initBorderMaskHandling(): void {
   const labelLeft = 15.2; // Matches 0.95rem in CSS
   const leftPadding = 2.4; // Scaled 0.2rem CSS padding (0.75)
 
+  let maskRaf: number;
   const updateMask = () => {
-    const counterWidth =
-      charCounter && charCounter.textContent ? charCounter.offsetWidth : 0;
-    const scaledTextWidth = (labelCore.offsetWidth + counterWidth) * 0.75;
+    cancelAnimationFrame(maskRaf);
+    maskRaf = requestAnimationFrame(() => {
+      const counterWidth =
+        charCounter && charCounter.textContent ? charCounter.offsetWidth : 0;
+      const scaledTextWidth = (labelCore.offsetWidth + counterWidth) * 0.75;
 
-    const textInkLeft = labelLeft + leftPadding;
-    const maskLeft = textInkLeft - visualLeftGap;
-    const maskWidth = visualLeftGap + scaledTextWidth + visualRightGap;
+      const textInkLeft = labelLeft + leftPadding;
+      const maskLeft = textInkLeft - visualLeftGap;
+      const maskWidth = visualLeftGap + scaledTextWidth + visualRightGap;
 
-    borderBox.style.setProperty("--mask-width", `${maskWidth}px`);
-    borderBox.style.setProperty("--mask-left", `${maskLeft}px`);
+      borderBox.style.setProperty("--mask-width", `${maskWidth}px`);
+      borderBox.style.setProperty("--mask-left", `${maskLeft}px`);
+    });
   };
 
   updateMask();
@@ -259,8 +260,11 @@ function initHashSelector(): void {
 
   hashSelect.addEventListener("change", () => {
     if (textarea.value.length > 0) {
-      const result = zxcvbn.check(textarea.value);
-      updateCrackTimes(result.guesses);
+      const currentJobId = ++latestInputJobId;
+      evaluatePassword(textarea.value).then(result => {
+        if (!result || currentJobId !== latestInputJobId) return;
+        updateCrackTimes(result.guesses);
+      });
     }
   });
 }

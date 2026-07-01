@@ -1,12 +1,9 @@
+import ZxcvbnWorker from "./zxcvbn.worker?worker&inline";
 
-import { ZxcvbnFactory } from "@zxcvbn-ts/core";
-import * as zxcvbnCommonPackage from "@zxcvbn-ts/language-common";
-import * as zxcvbnEnPackage from "@zxcvbn-ts/language-en";
-import * as zxcvbnFaPackage from "@zxcvbn-ts/language-fa";
 export type HardwareTier = "laptop" | "pc" | "server" | "supercomputer";
 export type Algorithm = "md5" | "sha256" | "pbkdf2" | "bcrypt" | "argon2id";
 
-// Hash rates based on 2025/2026 hashcat benchmarks. Values are absolute hashes/second.
+// Hash rates from 2025/2026 hashcat benchmarks (hashes/sec)
 export const HASH_RATES: Record<HardwareTier, Record<Algorithm, number>> = {
   laptop: { md5: 1e10, sha256: 1e9, pbkdf2: 1e5, bcrypt: 1500, argon2id: 200 },
   pc: { md5: 1.64e11, sha256: 2.2e10, pbkdf2: 2.5e6, bcrypt: 10000, argon2id: 1500 },
@@ -14,76 +11,38 @@ export const HASH_RATES: Record<HardwareTier, Record<Algorithm, number>> = {
   supercomputer: { md5: 1.64e15, sha256: 2.2e14, pbkdf2: 2.5e10, bcrypt: 1e8, argon2id: 1.5e7 },
 };
 
-const zxcvbnOptions = {
-  dictionary: {
-    ...zxcvbnCommonPackage.dictionary,
-    ...zxcvbnEnPackage.dictionary,
-    ...zxcvbnFaPackage.dictionary,
-  },
-  graphs: zxcvbnCommonPackage.adjacencyGraphs,
-  translations: zxcvbnEnPackage.translations,
+export interface ZxcvbnResult {
+  guesses: number;
+  score: number;
+  sequence: any[];
+}
+
+const worker = new ZxcvbnWorker();
+let currentJobId = 0;
+const pendingJobs = new Map<number, (result: ZxcvbnResult | null) => void>();
+
+worker.onmessage = (e: MessageEvent) => {
+  const { jobId, result } = e.data;
+  if (pendingJobs.has(jobId)) {
+    pendingJobs.get(jobId)!(result);
+    pendingJobs.delete(jobId);
+  }
 };
 
-export const zxcvbn = new ZxcvbnFactory(zxcvbnOptions);
+export function evaluatePassword(password: string): Promise<ZxcvbnResult | null> {
+  return new Promise((resolve) => {
+    // Invalidate stale pending jobs
+    pendingJobs.forEach((resolveStale) => resolveStale(null));
+    pendingJobs.clear();
 
-
-export interface ParsedPattern {
-  pattern: string;
-  token: string;
-  matchedWord?: string;
-  dictionaryName?: string;
-  l33t?: boolean;
-  l33tSubstitutions?: any;
-  l33tEntropy?: number;
-  spatialGraph?: string;
-  spatialTurns?: number;
-  repeatBase?: string;
-  repeatCount?: number;
-  isOfflineBreached?: boolean;
-  breachRank?: number;
+    const jobId = ++currentJobId;
+    pendingJobs.set(jobId, resolve);
+    worker.postMessage({ jobId, password });
+  });
 }
 
-export function parseZxcvbnSequence(sequence: any[]): ParsedPattern[] {
-  const result: ParsedPattern[] = [];
-  for (const match of sequence) {
-    const item: ParsedPattern = {
-      pattern: match.pattern,
-      token: match.token,
-    };
-    if (match.pattern === "dictionary") {
-      item.matchedWord = match.matchedWord;
-      item.dictionaryName = match.dictionaryName;
-      item.l33t = !!match.l33t;
-      if (match.l33t) {
-        item.l33tSubstitutions = match.subs;
-        const variations = match.l33tVariations || 1;
-        item.l33tEntropy = Math.log2(variations);
-      }
-      if (match.dictionaryName === "passwords-common") {
-        item.isOfflineBreached = true;
-        item.breachRank = match.rank;
-      }
-    } else if (match.pattern === "spatial") {
-      item.spatialGraph = match.graph;
-      item.spatialTurns = match.turns;
-    } else if (match.pattern === "repeat") {
-      item.repeatBase = typeof match.baseToken === "string" ? match.baseToken : String(match.baseToken);
-      item.repeatCount = match.repeatCount;
-    }
-    result.push(item);
-  }
-  return result;
-}
 
-/**
- * Calculates the estimated time to crack a password in seconds, based on
- * real-world hardware benchmarks and the selected hashing algorithm.
- * 
- * @param guesses The total number of guesses required to crack the password (from zxcvbn.guesses)
- * @param hardware The hardware tier of the attacker
- * @param algo The hashing algorithm used to store the password
- * @returns Time in seconds to crack
- */
+
 export function calculateCrackTime(
   guesses: number,
   hardware: HardwareTier,
@@ -93,9 +52,6 @@ export function calculateCrackTime(
   return guesses / hashRate;
 }
 
-/**
- * Formats seconds into a human-readable value and unit.
- */
 export function formatTime(seconds: number): { value: string; unit: string } {
   if (seconds === 0) return { value: "  0", unit: "Seconds" };
   if (seconds < 1) return { value: "< 1", unit: "Second" };
@@ -137,7 +93,7 @@ export function formatTime(seconds: number): { value: string; unit: string } {
   if (unit === "Centuries" && rawVal > 99) {
     valueStr = ">99";
   } else {
-    // Pad to 2 digits with a space prefix (total 3 characters including sign slot)
+    // Pad for layout alignment
     if (rawVal < 10) {
       valueStr = "  " + rawVal;
     } else {

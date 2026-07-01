@@ -154,6 +154,7 @@ body {
   transition:
     border-color var(--transition-normal),
     box-shadow var(--transition-normal);
+  will-change: transform, opacity;
 }
 
 .section-card:hover {
@@ -349,6 +350,7 @@ body {
   overflow: visible; /* Allows floating label to extend above border */
   transition: box-shadow var(--transition-normal);
   position: relative;
+  will-change: transform, opacity;
 }
 
 .passphrase-border-box::before {
@@ -418,6 +420,7 @@ body {
   outline: none;
   overflow: hidden;
   height: 28px;
+  will-change: height;
   line-height: 1.5;
   display: block;
   overflow-wrap: break-word;
