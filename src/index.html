@@ -226,13 +226,14 @@
                       <div class="tooltip-content" role="tooltip">
                         <strong>ASCII:</strong> Generates a random character
                         string.<br />
-                        • Customize character pool via checkboxes: A-Z
-                        (uppercase), a-z (lowercase), 0-9 (digits), and
+                        • Customize character pool via checkboxes:<br />
+                        A-Z (uppercase), a-z (lowercase), 0-9 (digits), and
                         Symbols.<br />
-                        • Ambig includes visually similar characters like
-                        <span style="font-family: monospace"
-                          >l, 1, I, o, 0, O</span
-                        >.<br /><br />
+                        • Ambiguous includes visually similar characters (<span
+                          style="font-family: monospace"
+                          >0, O, o, I, l, 1, i, L, |, 8, B, 9, g, q, 5, S, s, 2,
+                          Z, z</span
+                        >).<br /><br />
                         <strong>Diceware Phrases:</strong> Generates a sequence
                         of random words from a secure list.<br />
                         • Separator character (default is space) is used to
@@ -273,7 +274,7 @@
                       </label>
                       <label class="custom-checkbox-label">
                         <input type="checkbox" id="ascii-ambiguous" />
-                        <span>Ambig</span>
+                        <span>Ambiguous</span>
                       </label>
                     </div>
                   </div>
@@ -299,45 +300,47 @@
                 </div>
 
                 <div class="advanced-crack-group">
-                  <div class="label-with-tooltip margin-bottom-sm">
-                    <span class="input-field-label clickable-title"
-                      >Generation Target Resistance Time:</span
-                    >
-                    <div class="tooltip-container">
-                      <button
-                        class="tooltip-trigger"
-                        aria-label="Target crack resistance info"
-                        type="button"
+                  <div class="aligned-settings-row margin-bottom-sm">
+                    <div class="label-with-tooltip">
+                      <span class="input-field-label clickable-title"
+                        >Generation Target Resistance Time:</span
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="15"
-                          height="15"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          class="tooltip-icon"
+                      <div class="tooltip-container">
+                        <button
+                          class="tooltip-trigger"
+                          aria-label="Target crack resistance info"
+                          type="button"
                         >
-                          <circle cx="12" cy="12" r="10" stroke-width="1.6" />
-                          <path
-                            d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
-                            stroke-width="2.8"
-                          />
-                          <circle
-                            cx="12"
-                            cy="17"
-                            r="1.4"
-                            fill="currentColor"
-                            stroke="none"
-                          />
-                        </svg>
-                      </button>
-                      <div class="tooltip-content" role="tooltip">
-                        Generates a passphrase mathematically guaranteed to
-                        withstand brute-force search by the selected class of
-                        cracking hardware for the specified duration.
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="15"
+                            height="15"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="tooltip-icon"
+                          >
+                            <circle cx="12" cy="12" r="10" stroke-width="1.6" />
+                            <path
+                              d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
+                              stroke-width="2.8"
+                            />
+                            <circle
+                              cx="12"
+                              cy="17"
+                              r="1.4"
+                              fill="currentColor"
+                              stroke="none"
+                            />
+                          </svg>
+                        </button>
+                        <div class="tooltip-content" role="tooltip">
+                          Generates a passphrase mathematically guaranteed to
+                          withstand brute-force search by the selected class of
+                          cracking hardware for the specified duration.
+                        </div>
                       </div>
                     </div>
                   </div>
