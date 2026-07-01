@@ -1,7 +1,7 @@
 import "katex/dist/katex.min.css";
+import { zxcvbn, parseZxcvbnSequence, calculateCrackTime, formatTime, Algorithm, HardwareTier } from "./crypto";
 
-// One-shot callbacks, flushed on next input.
-const onNextInputChange: Array<() => void> = [];
+const onNextInputChange: (() => void)[] = [];
 
 function flushInputResets(): void {
   while (onNextInputChange.length) {
@@ -15,6 +15,7 @@ initTargetTimeValueInput();
 initBorderMaskHandling();
 initMobileAutoScroll();
 initTooltips();
+initHashSelector();
 
 function initPassphraseInput(): void {
   const textarea = document.getElementById(
@@ -33,6 +34,9 @@ function initPassphraseInput(): void {
     textarea.style.height = textarea.scrollHeight + "px";
   };
 
+  window.addEventListener("resize", adjustHeight);
+  adjustHeight();
+
   textarea.addEventListener("keydown", (e: KeyboardEvent) => {
     if (e.key === "Enter") e.preventDefault();
   });
@@ -49,13 +53,47 @@ function initPassphraseInput(): void {
 
     if (counter) counter.textContent = hasContent ? ` (${len})` : "";
     if (clearBtn) clearBtn.hidden = !hasContent;
-    if (copyBtn) copyBtn.disabled = !hasContent;
+
+    let hasInvalidChar = false;
+    let invalidChar = "";
+    const invalidMatch = textarea.value.match(/[^\x20-\x7E]/);
+    if (invalidMatch) {
+      hasInvalidChar = true;
+      invalidChar = invalidMatch[0];
+    }
+
+    if (copyBtn) {
+      if (hasInvalidChar) {
+        copyBtn.disabled = false;
+        copyBtn.textContent = `Invalid Character: ${invalidChar}`;
+        copyBtn.classList.add("btn-unsupported");
+      } else {
+        copyBtn.disabled = !hasContent;
+        copyBtn.textContent = "Copy";
+        copyBtn.classList.remove("btn-unsupported");
+      }
+    }
+
+    if (hasContent && !hasInvalidChar) {
+      const result = zxcvbn.check(textarea.value);
+      console.log("zxcvbn check:", result);
+      console.log("parsed patterns:", parseZxcvbnSequence(result.sequence));
+      updateCrackTimes(result.guesses);
+      updateResistanceBadge(result.score);
+    } else {
+      resetCrackTimes();
+      resetResistanceBadge();
+    }
 
     adjustHeight();
   });
 
   if (copyBtn) {
     copyBtn.addEventListener("click", () => {
+      if (copyBtn.classList.contains("btn-unsupported")) {
+        return;
+      }
+
       if (!textarea.value) return;
 
       const onSuccess = () => {
@@ -103,8 +141,11 @@ function initPassphraseInput(): void {
       if (copyBtn) {
         copyBtn.textContent = "Copy";
         copyBtn.disabled = true;
+        copyBtn.classList.remove("btn-unsupported");
       }
       onNextInputChange.length = 0;
+      resetCrackTimes();
+      resetResistanceBadge();
       textarea.focus();
     });
   }
@@ -171,6 +212,7 @@ function initBorderMaskHandling(): void {
   textarea.addEventListener("input", updateMask);
   textarea.addEventListener("focus", updateMask);
   textarea.addEventListener("blur", updateMask);
+  window.addEventListener("resize", updateMask);
 
   if (clearBtn) clearBtn.addEventListener("click", updateMask);
 }
@@ -208,4 +250,84 @@ function initTooltips(): void {
       }
     });
   });
+}
+
+function initHashSelector(): void {
+  const hashSelect = document.getElementById("hash-algorithm") as HTMLSelectElement | null;
+  const textarea = document.getElementById("passphrase-input") as HTMLTextAreaElement | null;
+  if (!hashSelect || !textarea) return;
+
+  hashSelect.addEventListener("change", () => {
+    if (textarea.value.length > 0) {
+      const result = zxcvbn.check(textarea.value);
+      updateCrackTimes(result.guesses);
+    }
+  });
+}
+
+function updateCrackTimes(guesses: number): void {
+  const hashSelect = document.getElementById("hash-algorithm") as HTMLSelectElement | null;
+  if (!hashSelect) return;
+  const algo = hashSelect.value as Algorithm;
+
+  const tiers: HardwareTier[] = ["laptop", "pc", "server", "supercomputer"];
+  const timeMapping: Record<HardwareTier, string> = {
+    laptop: "time-laptop",
+    pc: "time-pc",
+    server: "time-server",
+    supercomputer: "time-supercomputer",
+  };
+
+  tiers.forEach(tier => {
+    const elId = timeMapping[tier];
+    const el = document.getElementById(elId);
+    if (el) {
+      const timeInSeconds = calculateCrackTime(guesses, tier, algo);
+      const formatted = formatTime(timeInSeconds);
+      
+      const valEl = el.querySelector(".time-value");
+      const unitEl = el.querySelector(".time-unit");
+      if (valEl) valEl.textContent = formatted.value;
+      if (unitEl) unitEl.textContent = formatted.unit;
+    }
+  });
+}
+
+function resetCrackTimes(): void {
+  const ids = ["time-laptop", "time-pc", "time-server", "time-supercomputer"];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      const valEl = el.querySelector(".time-value");
+      const unitEl = el.querySelector(".time-unit");
+      if (valEl) valEl.textContent = "  0";
+      if (unitEl) unitEl.textContent = "Seconds";
+    }
+  });
+}
+
+function updateResistanceBadge(score: number): void {
+  const badge = document.getElementById("resistance-badge");
+  if (!badge) return;
+  
+  badge.classList.remove("badge-low", "badge-medium", "badge-high");
+  
+  if (score <= 1) {
+    badge.textContent = "Low";
+    badge.classList.add("badge-low");
+  } else if (score === 2) {
+    badge.textContent = "Medium";
+    badge.classList.add("badge-medium");
+  } else {
+    badge.textContent = "High";
+    badge.classList.add("badge-high");
+  }
+}
+
+function resetResistanceBadge(): void {
+  const badge = document.getElementById("resistance-badge");
+  if (!badge) return;
+  badge.textContent = "Low";
+  badge.classList.remove("badge-medium", "badge-high");
+  badge.classList.add("badge-low");
 }

@@ -1,0 +1,591 @@
+diff --git a/package-lock.json b/package-lock.json
+index afee7a3..cb173d2 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -9,6 +9,10 @@
+       "version": "1.0.0",
+       "license": "ISC",
+       "dependencies": {
++        "@zxcvbn-ts/core": "^4.1.2",
++        "@zxcvbn-ts/language-common": "^4.1.2",
++        "@zxcvbn-ts/language-en": "^4.1.1",
++        "@zxcvbn-ts/language-fa": "^4.1.1",
+         "hash-wasm": "^4.12.0",
+         "katex": "^0.17.0"
+       },
+@@ -341,6 +345,43 @@
+       "integrity": "sha512-trgaNyfU+Xh2Tc+ABIb44a5AYUpicB3uwirOioeOkNPPbmgRNtcWyDeeFRzjPZENO9Vq8gvVqfhaaXWLlevVwg==",
+       "dev": true
+     },
++    "node_modules/@zxcvbn-ts/core": {
++      "version": "4.1.2",
++      "resolved": "https://registry.npmjs.org/@zxcvbn-ts/core/-/core-4.1.2.tgz",
++      "integrity": "sha512-RQmxWB3AMI+HGQErQdUv6Aq32aQhp6xOxrfgCP0+T9MsLZoP3xtLHuT8O8VojsUxdmQVZfJlYkYb1A0wOwIS+Q==",
++      "dependencies": {
++        "fastest-levenshtein": "1.0.16"
++      }
++    },
++    "node_modules/@zxcvbn-ts/dictionary-compression": {
++      "version": "3.0.1",
++      "resolved": "https://registry.npmjs.org/@zxcvbn-ts/dictionary-compression/-/dictionary-compression-3.0.1.tgz",
++      "integrity": "sha512-p3KyPzxGc3vWSap5hHA6SllbUCmh7s+NtpGyC3qEWrxYJT9t9TUAzjPm48Okipo+UUyPQfDlIvTcs9JRShBFiQ=="
++    },
++    "node_modules/@zxcvbn-ts/language-common": {
++      "version": "4.1.2",
++      "resolved": "https://registry.npmjs.org/@zxcvbn-ts/language-common/-/language-common-4.1.2.tgz",
++      "integrity": "sha512-uJlBzhC9/KjPImqdnc1/lPxmdn4xKbkruN5p1mASWkXA0gli+GZ5LrVL+dqscA8Pcf4OfudE56TtCWeHljJOvA==",
++      "dependencies": {
++        "@zxcvbn-ts/dictionary-compression": "^3.0.1"
++      }
++    },
++    "node_modules/@zxcvbn-ts/language-en": {
++      "version": "4.1.1",
++      "resolved": "https://registry.npmjs.org/@zxcvbn-ts/language-en/-/language-en-4.1.1.tgz",
++      "integrity": "sha512-6UdzuBd3Uex8TKubohcn+uXRVAH34Zjs2eCfT4hQVo9zeTy7AkQRQfdV4OnHR5hQfW/XBrK/AGTZk7VBWh7wwQ==",
++      "dependencies": {
++        "@zxcvbn-ts/dictionary-compression": "^3.0.1"
++      }
++    },
++    "node_modules/@zxcvbn-ts/language-fa": {
++      "version": "4.1.1",
++      "resolved": "https://registry.npmjs.org/@zxcvbn-ts/language-fa/-/language-fa-4.1.1.tgz",
++      "integrity": "sha512-1gdT+kWsmhoVD96/NnbEi++Ohf8AASqiDhMtmdYpLTPrKVBzRRUB87f4QmwxiIbVc/Tuis+VUqaslF4RbHS40Q==",
++      "dependencies": {
++        "@zxcvbn-ts/dictionary-compression": "^3.0.1"
++      }
++    },
+     "node_modules/braces": {
+       "version": "3.0.3",
+       "resolved": "https://registry.npmjs.org/braces/-/braces-3.0.3.tgz",
+@@ -370,6 +411,14 @@
+         "node": ">=8"
+       }
+     },
++    "node_modules/fastest-levenshtein": {
++      "version": "1.0.16",
++      "resolved": "https://registry.npmjs.org/fastest-levenshtein/-/fastest-levenshtein-1.0.16.tgz",
++      "integrity": "sha512-eRnCtTTtGZFpQCwhJiUOuxPQWRXVKYDn0b2PeHfXL6/Zi53SLAzAHfVhVWK2AryC/WH05kGfxhFIPvTF0SXQzg==",
++      "engines": {
++        "node": ">= 4.9.1"
++      }
++    },
+     "node_modules/fdir": {
+       "version": "6.5.0",
+       "resolved": "https://registry.npmjs.org/fdir/-/fdir-6.5.0.tgz",
+diff --git a/package.json b/package.json
+index 9afb557..e1c670e 100644
+--- a/package.json
++++ b/package.json
+@@ -23,6 +23,10 @@
+     "vite-plugin-singlefile": "^2.3.3"
+   },
+   "dependencies": {
++    "@zxcvbn-ts/core": "^4.1.2",
++    "@zxcvbn-ts/language-common": "^4.1.2",
++    "@zxcvbn-ts/language-en": "^4.1.1",
++    "@zxcvbn-ts/language-fa": "^4.1.1",
+     "hash-wasm": "^4.12.0",
+     "katex": "^0.17.0"
+   }
+diff --git a/src/css/main.css b/src/css/main.css
+index 39cf27f..d18f0d8 100644
+--- a/src/css/main.css
++++ b/src/css/main.css
+@@ -41,7 +41,7 @@
+   --accent-neon: #00e676;
+ 
+   --color-high: #00e676;
+-  --color-medium: #ffd600;
++  --color-medium: #ffb300;
+   --color-low: #ff1744;
+ 
+   --font-sans:
+@@ -420,6 +420,9 @@ body {
+   height: 28px;
+   line-height: 1.5;
+   display: block;
++  overflow-wrap: break-word;
++  word-break: break-all;
++  padding: 0;
+ }
+ 
+ .floating-label {
+@@ -558,6 +561,10 @@ body {
+   flex: 1;
+ }
+ 
++.btn-unsupported {
++  color: var(--color-medium) !important;
++}
++
+ .actions-divider {
+   width: 1px;
+   height: 1.5rem;
+@@ -655,30 +662,42 @@ body {
+   text-align: center;
+   font-size: 0.8rem;
+   font-weight: 700;
+-  padding: 0.25rem 0;
++  padding: calc(0.25rem - 1px) 0;
+   border-radius: 4px;
+   text-transform: uppercase;
+   letter-spacing: 0.05em;
+   color: #fff;
++  backdrop-filter: blur(4px);
++  -webkit-backdrop-filter: blur(4px);
+   transition:
+     background-color var(--transition-normal),
++    border-color var(--transition-normal),
++    text-shadow var(--transition-normal),
+     box-shadow var(--transition-normal);
+ }
+ 
+ .badge-low {
+-  background-color: var(--color-low);
+-  box-shadow: 0 0 10px rgba(255, 23, 68, 0.3);
++  background-color: rgba(255, 23, 68, 0.18);
++  border: 1px solid rgba(255, 23, 68, 0.8);
++  color: #fff;
++  text-shadow: 0 0 8px var(--color-low);
++  box-shadow: 0 0 12px rgba(255, 23, 68, 0.25);
+ }
+ 
+ .badge-medium {
+-  background-color: var(--color-medium);
+-  color: #000;
+-  box-shadow: 0 0 10px rgba(255, 214, 0, 0.3);
++  background-color: rgba(255, 179, 0, 0.18);
++  border: 1px solid rgba(255, 179, 0, 0.8);
++  color: #fff;
++  text-shadow: 0 0 8px var(--color-medium);
++  box-shadow: 0 0 12px rgba(255, 179, 0, 0.25);
+ }
+ 
+ .badge-high {
+-  background-color: var(--color-high);
+-  box-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
++  background-color: rgba(0, 230, 118, 0.18);
++  border: 1px solid rgba(0, 230, 118, 0.8);
++  color: #fff;
++  text-shadow: 0 0 8px var(--color-high);
++  box-shadow: 0 0 12px rgba(0, 230, 118, 0.25);
+ }
+ 
+ .resistance-grid {
+@@ -730,6 +749,7 @@ body {
+ .time-value {
+   text-align: right;
+   padding-right: calc(0.75rem + 1px);
++  white-space: pre;
+ }
+ 
+ .time-unit {
+diff --git a/src/index.html b/src/index.html
+index 98e0d59..c6670a0 100644
+--- a/src/index.html
++++ b/src/index.html
+@@ -287,7 +287,7 @@
+                 <span class="connector-line"></span>
+               </div>
+               <span class="crack-time-display" id="time-laptop"
+-                ><span class="time-value">0</span
++                ><span class="time-value"> 0</span
+                 ><span class="time-unit">Seconds</span></span
+               >
+             </div>
+@@ -297,7 +297,7 @@
+                 <span class="connector-line"></span>
+               </div>
+               <span class="crack-time-display" id="time-pc"
+-                ><span class="time-value">0</span
++                ><span class="time-value"> 0</span
+                 ><span class="time-unit">Seconds</span></span
+               >
+             </div>
+@@ -307,7 +307,7 @@
+                 <span class="connector-line"></span>
+               </div>
+               <span class="crack-time-display" id="time-server"
+-                ><span class="time-value">0</span
++                ><span class="time-value"> 0</span
+                 ><span class="time-unit">Seconds</span></span
+               >
+             </div>
+@@ -317,7 +317,7 @@
+                 <span class="connector-line"></span>
+               </div>
+               <span class="crack-time-display" id="time-supercomputer"
+-                ><span class="time-value">0</span
++                ><span class="time-value"> 0</span
+                 ><span class="time-unit">Seconds</span></span
+               >
+             </div>
+diff --git a/src/ts/app.ts b/src/ts/app.ts
+index c40bde8..749d999 100644
+--- a/src/ts/app.ts
++++ b/src/ts/app.ts
+@@ -1,7 +1,7 @@
+ import "katex/dist/katex.min.css";
++import { zxcvbn, parseZxcvbnSequence, calculateCrackTime, formatTime, Algorithm, HardwareTier } from "./crypto";
+ 
+-// One-shot callbacks, flushed on next input.
+-const onNextInputChange: Array<() => void> = [];
++const onNextInputChange: (() => void)[] = [];
+ 
+ function flushInputResets(): void {
+   while (onNextInputChange.length) {
+@@ -15,6 +15,7 @@ initTargetTimeValueInput();
+ initBorderMaskHandling();
+ initMobileAutoScroll();
+ initTooltips();
++initHashSelector();
+ 
+ function initPassphraseInput(): void {
+   const textarea = document.getElementById(
+@@ -33,6 +34,9 @@ function initPassphraseInput(): void {
+     textarea.style.height = textarea.scrollHeight + "px";
+   };
+ 
++  window.addEventListener("resize", adjustHeight);
++  adjustHeight();
++
+   textarea.addEventListener("keydown", (e: KeyboardEvent) => {
+     if (e.key === "Enter") e.preventDefault();
+   });
+@@ -49,13 +53,47 @@ function initPassphraseInput(): void {
+ 
+     if (counter) counter.textContent = hasContent ? ` (${len})` : "";
+     if (clearBtn) clearBtn.hidden = !hasContent;
+-    if (copyBtn) copyBtn.disabled = !hasContent;
++
++    let hasInvalidChar = false;
++    let invalidChar = "";
++    const invalidMatch = textarea.value.match(/[^\x20-\x7E]/);
++    if (invalidMatch) {
++      hasInvalidChar = true;
++      invalidChar = invalidMatch[0];
++    }
++
++    if (copyBtn) {
++      if (hasInvalidChar) {
++        copyBtn.disabled = false;
++        copyBtn.textContent = `Invalid Character: ${invalidChar}`;
++        copyBtn.classList.add("btn-unsupported");
++      } else {
++        copyBtn.disabled = !hasContent;
++        copyBtn.textContent = "Copy";
++        copyBtn.classList.remove("btn-unsupported");
++      }
++    }
++
++    if (hasContent && !hasInvalidChar) {
++      const result = zxcvbn.check(textarea.value);
++      console.log("zxcvbn check:", result);
++      console.log("parsed patterns:", parseZxcvbnSequence(result.sequence));
++      updateCrackTimes(result.guesses);
++      updateResistanceBadge(result.score);
++    } else {
++      resetCrackTimes();
++      resetResistanceBadge();
++    }
+ 
+     adjustHeight();
+   });
+ 
+   if (copyBtn) {
+     copyBtn.addEventListener("click", () => {
++      if (copyBtn.classList.contains("btn-unsupported")) {
++        return;
++      }
++
+       if (!textarea.value) return;
+ 
+       const onSuccess = () => {
+@@ -103,8 +141,11 @@ function initPassphraseInput(): void {
+       if (copyBtn) {
+         copyBtn.textContent = "Copy";
+         copyBtn.disabled = true;
++        copyBtn.classList.remove("btn-unsupported");
+       }
+       onNextInputChange.length = 0;
++      resetCrackTimes();
++      resetResistanceBadge();
+       textarea.focus();
+     });
+   }
+@@ -171,6 +212,7 @@ function initBorderMaskHandling(): void {
+   textarea.addEventListener("input", updateMask);
+   textarea.addEventListener("focus", updateMask);
+   textarea.addEventListener("blur", updateMask);
++  window.addEventListener("resize", updateMask);
+ 
+   if (clearBtn) clearBtn.addEventListener("click", updateMask);
+ }
+@@ -209,3 +251,83 @@ function initTooltips(): void {
+     });
+   });
+ }
++
++function initHashSelector(): void {
++  const hashSelect = document.getElementById("hash-algorithm") as HTMLSelectElement | null;
++  const textarea = document.getElementById("passphrase-input") as HTMLTextAreaElement | null;
++  if (!hashSelect || !textarea) return;
++
++  hashSelect.addEventListener("change", () => {
++    if (textarea.value.length > 0) {
++      const result = zxcvbn.check(textarea.value);
++      updateCrackTimes(result.guesses);
++    }
++  });
++}
++
++function updateCrackTimes(guesses: number): void {
++  const hashSelect = document.getElementById("hash-algorithm") as HTMLSelectElement | null;
++  if (!hashSelect) return;
++  const algo = hashSelect.value as Algorithm;
++
++  const tiers: HardwareTier[] = ["laptop", "pc", "server", "supercomputer"];
++  const timeMapping: Record<HardwareTier, string> = {
++    laptop: "time-laptop",
++    pc: "time-pc",
++    server: "time-server",
++    supercomputer: "time-supercomputer",
++  };
++
++  tiers.forEach(tier => {
++    const elId = timeMapping[tier];
++    const el = document.getElementById(elId);
++    if (el) {
++      const timeInSeconds = calculateCrackTime(guesses, tier, algo);
++      const formatted = formatTime(timeInSeconds);
++      
++      const valEl = el.querySelector(".time-value");
++      const unitEl = el.querySelector(".time-unit");
++      if (valEl) valEl.textContent = formatted.value;
++      if (unitEl) unitEl.textContent = formatted.unit;
++    }
++  });
++}
++
++function resetCrackTimes(): void {
++  const ids = ["time-laptop", "time-pc", "time-server", "time-supercomputer"];
++  ids.forEach(id => {
++    const el = document.getElementById(id);
++    if (el) {
++      const valEl = el.querySelector(".time-value");
++      const unitEl = el.querySelector(".time-unit");
++      if (valEl) valEl.textContent = "  0";
++      if (unitEl) unitEl.textContent = "Seconds";
++    }
++  });
++}
++
++function updateResistanceBadge(score: number): void {
++  const badge = document.getElementById("resistance-badge");
++  if (!badge) return;
++  
++  badge.classList.remove("badge-low", "badge-medium", "badge-high");
++  
++  if (score <= 1) {
++    badge.textContent = "Low";
++    badge.classList.add("badge-low");
++  } else if (score === 2) {
++    badge.textContent = "Medium";
++    badge.classList.add("badge-medium");
++  } else {
++    badge.textContent = "High";
++    badge.classList.add("badge-high");
++  }
++}
++
++function resetResistanceBadge(): void {
++  const badge = document.getElementById("resistance-badge");
++  if (!badge) return;
++  badge.textContent = "Low";
++  badge.classList.remove("badge-medium", "badge-high");
++  badge.classList.add("badge-low");
++}
+diff --git a/src/ts/crypto.ts b/src/ts/crypto.ts
+index fd07231..b05c68b 100644
+--- a/src/ts/crypto.ts
++++ b/src/ts/crypto.ts
+@@ -1,35 +1,149 @@
+-import { dicewareList } from "./diceware-list";
+-
+-export function randomInt(max: number): number {
+-  if (max <= 0) return 0;
+-  const arr = new Uint32Array(1);
+-  window.crypto.getRandomValues(arr);
+-  // Ignore modulo bias for small max limits
+-  return arr[0] % max;
++
++import { ZxcvbnFactory } from "@zxcvbn-ts/core";
++import * as zxcvbnCommonPackage from "@zxcvbn-ts/language-common";
++import * as zxcvbnEnPackage from "@zxcvbn-ts/language-en";
++import * as zxcvbnFaPackage from "@zxcvbn-ts/language-fa";
++export type HardwareTier = "laptop" | "pc" | "server" | "supercomputer";
++export type Algorithm = "md5" | "sha256" | "pbkdf2" | "bcrypt" | "argon2id";
++
++// Hash rates based on 2025/2026 hashcat benchmarks. Values are absolute hashes/second.
++export const HASH_RATES: Record<HardwareTier, Record<Algorithm, number>> = {
++  laptop: { md5: 1e10, sha256: 1e9, pbkdf2: 1e5, bcrypt: 1500, argon2id: 200 },
++  pc: { md5: 1.64e11, sha256: 2.2e10, pbkdf2: 2.5e6, bcrypt: 10000, argon2id: 1500 },
++  server: { md5: 1.3e12, sha256: 1.76e11, pbkdf2: 2e7, bcrypt: 80000, argon2id: 12000 },
++  supercomputer: { md5: 1.64e15, sha256: 2.2e14, pbkdf2: 2.5e10, bcrypt: 1e8, argon2id: 1.5e7 },
++};
++
++const zxcvbnOptions = {
++  dictionary: {
++    ...zxcvbnCommonPackage.dictionary,
++    ...zxcvbnEnPackage.dictionary,
++    ...zxcvbnFaPackage.dictionary,
++  },
++  graphs: zxcvbnCommonPackage.adjacencyGraphs,
++  translations: zxcvbnEnPackage.translations,
++};
++
++export const zxcvbn = new ZxcvbnFactory(zxcvbnOptions);
++
++
++export interface ParsedPattern {
++  pattern: string;
++  token: string;
++  matchedWord?: string;
++  dictionaryName?: string;
++  l33t?: boolean;
++  l33tSubstitutions?: any;
++  l33tEntropy?: number;
++  spatialGraph?: string;
++  spatialTurns?: number;
++  repeatBase?: string;
++  repeatCount?: number;
++  isOfflineBreached?: boolean;
++  breachRank?: number;
+ }
+ 
+-export function genDiceware(
+-  wordCount: number = 6,
+-  separator: string = " ",
+-): string {
+-  if (typeof dicewareList === "undefined" || !dicewareList.length)
+-    throw new Error("dicewareList missing");
+-  const words = new Array(wordCount);
+-  const len = dicewareList.length;
+-  for (let i = 0; i < wordCount; i++) words[i] = dicewareList[randomInt(len)];
+-  return words.join(separator);
++export function parseZxcvbnSequence(sequence: any[]): ParsedPattern[] {
++  const result: ParsedPattern[] = [];
++  for (const match of sequence) {
++    const item: ParsedPattern = {
++      pattern: match.pattern,
++      token: match.token,
++    };
++    if (match.pattern === "dictionary") {
++      item.matchedWord = match.matchedWord;
++      item.dictionaryName = match.dictionaryName;
++      item.l33t = !!match.l33t;
++      if (match.l33t) {
++        item.l33tSubstitutions = match.subs;
++        const variations = match.l33tVariations || 1;
++        item.l33tEntropy = Math.log2(variations);
++      }
++      if (match.dictionaryName === "passwords-common") {
++        item.isOfflineBreached = true;
++        item.breachRank = match.rank;
++      }
++    } else if (match.pattern === "spatial") {
++      item.spatialGraph = match.graph;
++      item.spatialTurns = match.turns;
++    } else if (match.pattern === "repeat") {
++      item.repeatBase = typeof match.baseToken === "string" ? match.baseToken : String(match.baseToken);
++      item.repeatCount = match.repeatCount;
++    }
++    result.push(item);
++  }
++  return result;
+ }
+ 
+-export const CHARS_NUM = "0123456789";
+-export const CHARS_ALPHANUM =
+-  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+-export const CHARS_ASCII =
+-  "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+-
+-export function genPasscode(length: number, charset: string): string {
+-  if (length <= 0) return "";
+-  let passcode = "";
+-  const len = charset.length;
+-  for (let i = 0; i < length; i++) passcode += charset[randomInt(len)];
+-  return passcode;
++/**
++ * Calculates the estimated time to crack a password in seconds, based on
++ * real-world hardware benchmarks and the selected hashing algorithm.
++ * 
++ * @param guesses The total number of guesses required to crack the password (from zxcvbn.guesses)
++ * @param hardware The hardware tier of the attacker
++ * @param algo The hashing algorithm used to store the password
++ * @returns Time in seconds to crack
++ */
++export function calculateCrackTime(
++  guesses: number,
++  hardware: HardwareTier,
++  algo: Algorithm
++): number {
++  const hashRate = HASH_RATES[hardware][algo];
++  return guesses / hashRate;
++}
++
++/**
++ * Formats seconds into a human-readable value and unit.
++ */
++export function formatTime(seconds: number): { value: string; unit: string } {
++  if (seconds === 0) return { value: "  0", unit: "Seconds" };
++  if (seconds < 1) return { value: "< 1", unit: "Second" };
++  
++  const MINUTE = 60;
++  const HOUR = MINUTE * 60;
++  const DAY = HOUR * 24;
++  const MONTH = DAY * 31;
++  const YEAR = MONTH * 12;
++  const CENTURY = YEAR * 100;
++
++  let rawVal = 0;
++  let unit = "";
++
++  if (seconds < MINUTE) {
++    rawVal = Math.round(seconds);
++    unit = rawVal === 1 ? "Second" : "Seconds";
++  } else if (seconds < HOUR) {
++    rawVal = Math.round(seconds / MINUTE);
++    unit = rawVal === 1 ? "Minute" : "Minutes";
++  } else if (seconds < DAY) {
++    rawVal = Math.round(seconds / HOUR);
++    unit = rawVal === 1 ? "Hour" : "Hours";
++  } else if (seconds < MONTH) {
++    rawVal = Math.round(seconds / DAY);
++    unit = rawVal === 1 ? "Day" : "Days";
++  } else if (seconds < YEAR) {
++    rawVal = Math.round(seconds / MONTH);
++    unit = rawVal === 1 ? "Month" : "Months";
++  } else if (seconds < CENTURY) {
++    rawVal = Math.round(seconds / YEAR);
++    unit = rawVal === 1 ? "Year" : "Years";
++  } else {
++    rawVal = Math.round(seconds / CENTURY);
++    unit = rawVal === 1 ? "Century" : "Centuries";
++  }
++
++  let valueStr = "";
++  if (unit === "Centuries" && rawVal > 99) {
++    valueStr = ">99";
++  } else {
++    // Pad to 2 digits with a space prefix (total 3 characters including sign slot)
++    if (rawVal < 10) {
++      valueStr = "  " + rawVal;
++    } else {
++      valueStr = " " + rawVal;
++    }
++  }
++
++  return { value: valueStr, unit };
+ }
