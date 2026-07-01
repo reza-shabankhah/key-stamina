@@ -59,6 +59,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
@@ -82,6 +83,14 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+input,
+textarea {
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .sr-only {
@@ -99,7 +108,7 @@ body {
 .global-container {
   width: 100%;
   max-width: 512px;
-  min-width: 352px;
+  min-width: 375px;
   margin: 0 auto;
   padding: 2.5rem clamp(0.25rem, calc(12.5% - 2.5rem), 1.5rem);
   display: flex;
@@ -269,6 +278,8 @@ body {
   text-align-last: left;
   cursor: pointer;
   width: 100%;
+  height: 2.25rem;
+  box-sizing: border-box;
   transition: all var(--transition-fast);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   white-space: nowrap;
@@ -305,9 +316,11 @@ body {
   padding: 0.5rem 0.75rem;
   font-family: var(--font-mono);
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 500;
   text-align: right;
   width: 4.5rem;
+  height: 2.25rem;
+  box-sizing: border-box;
   transition: all var(--transition-fast);
 }
 
@@ -347,7 +360,7 @@ body {
   background: rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  overflow: visible; /* Allows floating label to extend above border */
+  overflow: visible; /* Allow label overflow */
   transition: box-shadow var(--transition-normal);
   position: relative;
   will-change: transform, opacity;
@@ -447,7 +460,7 @@ body {
     text-shadow var(--transition-normal);
   padding: 0 0.2rem;
   border-radius: 4px;
-  z-index: 4; /* Above ::before border */
+  z-index: 4;
   display: flex;
   align-items: center;
 }
@@ -455,7 +468,7 @@ body {
 .label-prefix {
   display: inline-block;
   overflow: hidden;
-  max-width: 4rem; /* Wide enough for "Type " */
+  max-width: 4rem;
   opacity: 1;
   transition:
     opacity var(--transition-normal),
@@ -592,9 +605,28 @@ body {
 }
 
 .advanced-panel {
-  display: block;
-  padding: 0;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  overflow: hidden;
+  margin-top: -1.5rem;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.2s ease-out,
+              margin-top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.advanced-panel.expanded {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  margin-top: 0;
   overflow: visible;
+  z-index: 5;
+}
+
+.advanced-panel-inner {
+  min-height: 0;
 }
 
 .advanced-grid {
@@ -617,8 +649,11 @@ body {
 }
 
 .size-hash-select {
-  flex: 0 0 max-content;
-  width: max-content;
+  flex: 1;
+}
+
+.section-hash-selector .label-with-tooltip {
+  flex: 0 0 calc((100% - 3.5rem) / 2 - 0.5rem);
 }
 
 .advanced-crack-group {
@@ -655,18 +690,20 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.25rem;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .status-badge {
-  display: inline-block;
-  width: 4.1rem; /* Matches the exact text width of "Centuries" */
-  margin-right: 0.88rem; /* Aligns precisely with the left-padded text in the 5.73rem column */
-  text-align: center;
-  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 5.73rem;
+  height: 2.25rem;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  font-size: 0.85rem;
   font-weight: 700;
-  padding: calc(0.25rem - 1px) 0;
-  border-radius: 4px;
+  border-radius: 6px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #fff;
@@ -711,7 +748,7 @@ body {
 
 .resistance-row {
   display: grid;
-  grid-template-columns: 1fr 3.2rem 5.73rem;
+  grid-template-columns: 1fr 3.8rem 5.73rem;
   gap: 0.5rem;
   align-items: center;
   width: 100%;
@@ -734,7 +771,8 @@ body {
 .connector-line {
   flex-grow: 1;
   border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
-  margin: 0 1rem;
+  margin-left: 0.75rem;
+  margin-right: -0.3rem;
 }
 
 .crack-time-display {
@@ -743,13 +781,13 @@ body {
 
 .time-value,
 .time-unit {
-  font-family: var(--font-mono);
   font-size: 0.9rem;
-  font-weight: 700;
   color: var(--text-main);
 }
 
 .time-value {
+  font-family: var(--font-mono);
+  font-weight: 500;
   text-align: right;
   padding-right: calc(0.75rem + 1px);
   white-space: pre;
@@ -784,4 +822,128 @@ body {
 
 .github-icon {
   fill: currentColor;
+}
+
+/* Advanced Toggle */
+.toggle-advanced-btn {
+  width: 3.5rem;
+  flex: 0 0 3.5rem;
+  color: var(--accent-neon);
+  font-size: 1.25rem;
+}
+
+.toggle-advanced-btn:hover:not(:disabled) {
+  background: rgba(0, 230, 118, 0.08) !important;
+  color: var(--accent-neon) !important;
+}
+
+.dynamic-options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.options-group {
+  display: flex;
+  align-items: center;
+  min-height: 2.25rem;
+  width: 100%;
+}
+
+.checkbox-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.custom-checkbox-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-muted);
+  transition: all var(--transition-fast) ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.custom-checkbox-label:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.custom-checkbox-label:has(input:checked) {
+  border-color: var(--accent-neon);
+  background: rgba(0, 230, 118, 0.06);
+  color: var(--text-main);
+  box-shadow: 0 0 10px rgba(0, 230, 118, 0.25);
+}
+
+.custom-checkbox-label:has(input:checked):hover {
+  background: rgba(0, 230, 118, 0.10);
+  border-color: var(--accent-neon);
+  box-shadow: 0 0 12px rgba(0, 230, 118, 0.35);
+}
+
+.custom-checkbox-label input[type="checkbox"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.custom-checkbox-label:has(input:focus-visible) {
+  outline: 2px solid var(--accent-neon);
+  outline-offset: 2px;
+}
+
+.custom-text-input {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: var(--text-main);
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  height: 2.25rem;
+  box-sizing: border-box;
+  transition: all var(--transition-fast);
+}
+
+.custom-text-input:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.custom-text-input:focus {
+  outline: none;
+  border-color: var(--accent-neon);
+  box-shadow: 0 0 8px rgba(0, 230, 118, 0.2);
+}
+
+.size-separator-input {
+  width: 9.43rem;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+#hash-algorithm,
+#generator-format {
+  text-align: center;
+  text-align-last: center;
 }

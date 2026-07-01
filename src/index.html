@@ -149,102 +149,144 @@
               >
                 Generate
               </button>
+              <div class="actions-divider"></div>
+              <button
+                id="toggle-advanced-btn"
+                class="box-action-btn toggle-advanced-btn"
+                type="button"
+                aria-label="Toggle advanced options"
+              >
+                +
+              </button>
             </div>
           </div>
 
           <div id="advanced-generation-panel" class="advanced-panel">
-            <div class="advanced-grid">
-              <div class="aligned-settings-row">
-                <div class="label-with-tooltip">
-                  <span class="input-field-label clickable-title"
-                    >Generation Format:</span
-                  >
-                  <div class="tooltip-container">
-                    <button
-                      class="tooltip-trigger"
-                      aria-label="Format info"
-                      type="button"
+            <div class="advanced-panel-inner">
+              <div class="advanced-grid">
+                <div class="aligned-settings-row">
+                  <div class="label-with-tooltip">
+                    <span class="input-field-label clickable-title"
+                      >Generation Format:</span
                     >
-                      i
-                    </button>
-                    <div class="tooltip-content" role="tooltip">
-                      <strong>Diceware Phrase:</strong> Random English words
-                      from a cryptographically secure list.<br />
-                      <strong>Full ASCII:</strong> Upper &amp; lower case
-                      letters, numbers, and special symbols.<br />
-                      <strong>Alphanumeric:</strong> A-Z, a-z, and 0-9.<br />
-                      <strong>Numeric PIN:</strong> Digits 0-9 only.
+                    <div class="tooltip-container">
+                      <button
+                        class="tooltip-trigger"
+                        aria-label="Format info"
+                        type="button"
+                      >
+                        i
+                      </button>
+                      <div class="tooltip-content" role="tooltip">
+                        <strong>ASCII:</strong> Generates a random character string.<br />
+                        • Customize character pool via checkboxes: A-Z (uppercase), a-z (lowercase), 0-9 (digits), and Symbols.<br />
+                        • Ambig includes visually similar characters like <span style="font-family: monospace;">l, 1, I, o, 0, O</span>.<br /><br />
+                        <strong>Diceware Phrases:</strong> Generates a sequence of random words from a secure list.<br />
+                        • Separator character (default is space) is used to separate words.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="select-wrapper size-format-select">
+                    <select id="generator-format" class="custom-select">
+                      <option value="ascii" selected>ASCII</option>
+                      <option value="diceware">Diceware Phrases</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div id="dynamic-format-options" class="dynamic-options-container">
+                  <div id="ascii-options" class="options-group">
+                    <div class="checkbox-row">
+                      <label class="custom-checkbox-label">
+                        <input type="checkbox" id="ascii-uppercase" checked />
+                        <span>A-Z</span>
+                      </label>
+                      <label class="custom-checkbox-label">
+                        <input type="checkbox" id="ascii-lowercase" checked />
+                        <span>a-z</span>
+                      </label>
+                      <label class="custom-checkbox-label">
+                        <input type="checkbox" id="ascii-numbers" checked />
+                        <span>0-9</span>
+                      </label>
+                      <label class="custom-checkbox-label">
+                        <input type="checkbox" id="ascii-special" checked />
+                        <span>Symbols</span>
+                      </label>
+                      <label class="custom-checkbox-label">
+                        <input type="checkbox" id="ascii-ambiguous" />
+                        <span>Ambig</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div id="diceware-options" class="options-group" style="display: none;">
+                    <div class="aligned-settings-row">
+                      <span class="input-field-label clickable-title">Separator Character:</span>
+                      <input type="text" id="diceware-separator" class="custom-text-input size-separator-input" value=" " maxlength="1" />
                     </div>
                   </div>
                 </div>
 
-                <div class="select-wrapper size-format-select">
-                  <select id="generator-format" class="custom-select">
-                    <option value="diceware" selected>Diceware Phrase</option>
-                    <option value="ascii">Full ASCII</option>
-                    <option value="alphanumeric">Alphanumeric</option>
-                    <option value="numeric">Numeric PIN</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="advanced-crack-group">
-                <div class="label-with-tooltip margin-bottom-sm">
-                  <span class="input-field-label clickable-title"
-                    >Generation Target Resistance Time:</span
-                  >
-                  <div class="tooltip-container">
-                    <button
-                      class="tooltip-trigger"
-                      aria-label="Target crack resistance info"
-                      type="button"
+                <div class="advanced-crack-group">
+                  <div class="label-with-tooltip margin-bottom-sm">
+                    <span class="input-field-label clickable-title"
+                      >Generation Target Resistance Time:</span
                     >
-                      i
-                    </button>
-                    <div class="tooltip-content" role="tooltip">
-                      Generates a passphrase mathematically guaranteed to
-                      withstand brute-force search by the selected class of
-                      cracking hardware for the specified duration.
+                    <div class="tooltip-container">
+                      <button
+                        class="tooltip-trigger"
+                        aria-label="Target crack resistance info"
+                        type="button"
+                      >
+                        i
+                      </button>
+                      <div class="tooltip-content" role="tooltip">
+                        Generates a passphrase mathematically guaranteed to
+                        withstand brute-force search by the selected class of
+                        cracking hardware for the specified duration.
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div class="crack-time-inputs">
-                  <div class="select-wrapper">
-                    <select
-                      id="target-hardware"
-                      class="custom-select"
-                      aria-label="Target hardware model"
-                    >
-                      <option value="laptop">Average Laptop</option>
-                      <option value="pc">High-end PC</option>
-                      <option value="server">Enterprise Server</option>
-                      <option value="supercomputer" selected>
-                        Supercomputer
-                      </option>
-                    </select>
-                  </div>
-                  <input
-                    id="target-time-value"
-                    class="custom-num-input"
-                    type="text"
-                    inputmode="numeric"
-                    value="1"
-                    aria-label="Target crack time value"
-                  />
-                  <div class="select-wrapper">
-                    <select
-                      id="target-time-unit"
-                      class="custom-select"
-                      aria-label="Target crack time unit"
-                    >
-                      <option value="seconds">Seconds</option>
-                      <option value="minutes">Minutes</option>
-                      <option value="hours">Hours</option>
-                      <option value="days">Days</option>
-                      <option value="years">Years</option>
-                      <option value="centuries" selected>Centuries</option>
-                    </select>
+                  <div class="crack-time-inputs">
+                    <div class="select-wrapper">
+                      <select
+                        id="target-hardware"
+                        class="custom-select"
+                        aria-label="Target hardware model"
+                      >
+                        <option value="laptop">Average Laptop</option>
+                        <option value="pc">High-end PC</option>
+                        <option value="server">Enterprise Server</option>
+                        <option value="supercomputer" selected>
+                          Supercomputer
+                        </option>
+                      </select>
+                    </div>
+                    <input
+                      id="target-time-value"
+                      class="custom-num-input"
+                      type="text"
+                      inputmode="numeric"
+                      value="1"
+                      aria-label="Target crack time value"
+                    />
+                    <div class="select-wrapper">
+                      <select
+                        id="target-time-unit"
+                        class="custom-select"
+                        aria-label="Target crack time unit"
+                      >
+                        <option value="seconds">Seconds</option>
+                        <option value="minutes">Minutes</option>
+                        <option value="hours">Hours</option>
+                        <option value="days">Days</option>
+                        <option value="years">Years</option>
+                        <option value="centuries" selected>Centuries</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>

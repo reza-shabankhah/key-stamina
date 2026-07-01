@@ -3,7 +3,25 @@ import ZxcvbnWorker from "./zxcvbn.worker?worker&inline";
 export type HardwareTier = "laptop" | "pc" | "server" | "supercomputer";
 export type Algorithm = "md5" | "sha256" | "pbkdf2" | "bcrypt" | "argon2id";
 
-// Hash rates from 2025/2026 hashcat benchmarks (hashes/sec)
+export type TimeUnit = "seconds" | "minutes" | "hours" | "days" | "years" | "centuries";
+
+const MINUTE = 60;
+const HOUR = MINUTE * 60;
+const DAY = HOUR * 24;
+const MONTH = DAY * 31;
+const YEAR = MONTH * 12;
+const CENTURY = YEAR * 100;
+
+export const TIME_UNIT_SECONDS: Record<TimeUnit, number> = {
+  seconds: 1,
+  minutes: MINUTE,
+  hours: HOUR,
+  days: DAY,
+  years: YEAR,
+  centuries: CENTURY,
+};
+
+// Hashcat 2025/2026 benchmarks (H/s)
 export const HASH_RATES: Record<HardwareTier, Record<Algorithm, number>> = {
   laptop: { md5: 1e10, sha256: 1e9, pbkdf2: 1e5, bcrypt: 1500, argon2id: 200 },
   pc: { md5: 1.64e11, sha256: 2.2e10, pbkdf2: 2.5e6, bcrypt: 10000, argon2id: 1500 },
@@ -31,7 +49,7 @@ worker.onmessage = (e: MessageEvent) => {
 
 export function evaluatePassword(password: string): Promise<ZxcvbnResult | null> {
   return new Promise((resolve) => {
-    // Invalidate stale pending jobs
+    // Cancel pending checks
     pendingJobs.forEach((resolveStale) => resolveStale(null));
     pendingJobs.clear();
 
@@ -54,52 +72,104 @@ export function calculateCrackTime(
 
 export function formatTime(seconds: number): { value: string; unit: string } {
   if (seconds === 0) return { value: "  0", unit: "Seconds" };
-  if (seconds < 1) return { value: "< 1", unit: "Second" };
-  
-  const MINUTE = 60;
-  const HOUR = MINUTE * 60;
-  const DAY = HOUR * 24;
-  const MONTH = DAY * 31;
-  const YEAR = MONTH * 12;
-  const CENTURY = YEAR * 100;
 
   let rawVal = 0;
   let unit = "";
 
   if (seconds < MINUTE) {
-    rawVal = Math.round(seconds);
-    unit = rawVal === 1 ? "Second" : "Seconds";
+    rawVal = seconds;
+    unit = "Seconds";
   } else if (seconds < HOUR) {
-    rawVal = Math.round(seconds / MINUTE);
-    unit = rawVal === 1 ? "Minute" : "Minutes";
+    rawVal = seconds / MINUTE;
+    unit = "Minutes";
   } else if (seconds < DAY) {
-    rawVal = Math.round(seconds / HOUR);
-    unit = rawVal === 1 ? "Hour" : "Hours";
+    rawVal = seconds / HOUR;
+    unit = "Hours";
   } else if (seconds < MONTH) {
-    rawVal = Math.round(seconds / DAY);
-    unit = rawVal === 1 ? "Day" : "Days";
+    rawVal = seconds / DAY;
+    unit = "Days";
   } else if (seconds < YEAR) {
-    rawVal = Math.round(seconds / MONTH);
-    unit = rawVal === 1 ? "Month" : "Months";
+    rawVal = seconds / MONTH;
+    unit = "Months";
   } else if (seconds < CENTURY) {
-    rawVal = Math.round(seconds / YEAR);
-    unit = rawVal === 1 ? "Year" : "Years";
+    rawVal = seconds / YEAR;
+    unit = "Years";
   } else {
-    rawVal = Math.round(seconds / CENTURY);
-    unit = rawVal === 1 ? "Century" : "Centuries";
+    rawVal = seconds / CENTURY;
+    unit = "Centuries";
   }
 
   let valueStr = "";
-  if (unit === "Centuries" && rawVal > 99) {
-    valueStr = ">99";
+  if (unit === "Centuries" && rawVal > 999.5) {
+    valueStr = "+999";
   } else {
-    // Pad for layout alignment
-    if (rawVal < 10) {
-      valueStr = "  " + rawVal;
+    if (rawVal < 9.95) {
+      const formatted = rawVal.toFixed(1);
+      valueStr = formatted === "0.0" ? "0.1" : formatted;
     } else {
-      valueStr = " " + rawVal;
+      const roundedVal = Math.round(rawVal);
+      const str = String(roundedVal);
+      if (str.length === 1) {
+        valueStr = "  " + str;
+      } else if (str.length === 2) {
+        valueStr = " " + str;
+      } else {
+        valueStr = str;
+      }
     }
   }
 
+  const displayNum = parseFloat(valueStr);
+  if (displayNum === 1) {
+    if (unit === "Centuries") unit = "Century";
+    else if (unit === "Months") unit = "Month";
+    else if (unit.endsWith("s")) unit = unit.slice(0, -1);
+  } else {
+    if (unit === "Century") unit = "Centuries";
+    else if (unit === "Month") unit = "Months";
+    else if (unit === "Second") unit = "Seconds";
+    else if (unit === "Minute") unit = "Minutes";
+    else if (unit === "Hour") unit = "Hours";
+    else if (unit === "Day") unit = "Days";
+    else if (unit === "Year") unit = "Years";
+  }
+
   return { value: valueStr, unit };
+}
+
+export function calculateRequiredGuesses(
+  timeValue: number,
+  unit: TimeUnit,
+  hardware: HardwareTier,
+  algo: Algorithm
+): number {
+  const hashRate = HASH_RATES[hardware][algo];
+  const targetSeconds = timeValue * TIME_UNIT_SECONDS[unit];
+  return targetSeconds * hashRate;
+}
+
+export function generateTargetedPassphrase(
+  format: "ascii" | "numeric",
+  guesses: number
+): string {
+  const charsets: Record<"ascii" | "numeric", string> = {
+    numeric: "0123456789",
+    ascii: " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+  };
+
+  const charset = charsets[format];
+  const c = charset.length;
+  let length = 1;
+  if (guesses > 1) {
+    length = Math.ceil(Math.log(guesses) / Math.log(c));
+  }
+  length = Math.min(Math.max(length, 1), 128);
+
+  const array = new Uint32Array(length);
+  crypto.getRandomValues(array);
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += charset[array[i] % c];
+  }
+  return result;
 }

@@ -1,5 +1,5 @@
 import "katex/dist/katex.min.css";
-import { evaluatePassword, calculateCrackTime, formatTime, Algorithm, HardwareTier } from "./crypto";
+import { evaluatePassword, calculateCrackTime, formatTime, Algorithm, HardwareTier, calculateRequiredGuesses, generateTargetedPassphrase, TimeUnit } from "./crypto";
 
 let latestInputJobId = 0;
 let evaluateTimeout: number | undefined;
@@ -10,6 +10,9 @@ initBorderMaskHandling();
 initMobileAutoScroll();
 initTooltips();
 initHashSelector();
+initGenerateButton();
+initAdvancedPanelToggle();
+initDynamicFormatOptionsInteractivity();
 
 function initPassphraseInput(): void {
   const textarea = document.getElementById(
@@ -61,7 +64,7 @@ function initPassphraseInput(): void {
     if (copyBtn) {
       if (hasInvalidChar) {
         copyBtn.disabled = false;
-        copyBtn.textContent = `Invalid Character: ${invalidChar}`;
+        copyBtn.textContent = `Invalid: ${invalidChar}`;
         copyBtn.classList.add("btn-unsupported");
       } else {
         copyBtn.disabled = !hasContent;
@@ -75,14 +78,14 @@ function initPassphraseInput(): void {
       evaluateTimeout = window.setTimeout(() => {
         const currentJobId = ++latestInputJobId;
         evaluatePassword(textarea.value).then(result => {
-          if (!result || currentJobId !== latestInputJobId) return; // Drop stale results
+          if (!result || currentJobId !== latestInputJobId) return; // Ignore stale
           updateCrackTimes(result.guesses);
           updateResistanceBadge(result.score);
         });
       }, 150);
     } else {
       clearTimeout(evaluateTimeout);
-      latestInputJobId++; // Invalidate pending jobs
+      latestInputJobId++;
       resetCrackTimes();
       resetResistanceBadge();
     }
@@ -189,8 +192,8 @@ function initBorderMaskHandling(): void {
   const visualLeftGap = 4.0;
   const visualRightGap = 2.0;
 
-  const labelLeft = 15.2; // Matches 0.95rem in CSS
-  const leftPadding = 2.4; // Scaled 0.2rem CSS padding (0.75)
+  const labelLeft = 15.2; // 0.95rem CSS match
+  const leftPadding = 2.4; // 0.2rem CSS padding scaled
 
   let maskRaf: number;
   const updateMask = () => {
@@ -334,4 +337,94 @@ function resetResistanceBadge(): void {
   badge.textContent = "Low";
   badge.classList.remove("badge-medium", "badge-high");
   badge.classList.add("badge-low");
+}
+
+function initGenerateButton(): void {
+  const generateBtn = document.getElementById("generate-btn");
+  const formatSelect = document.getElementById("generator-format") as HTMLSelectElement | null;
+  const targetHardwareSelect = document.getElementById("target-hardware") as HTMLSelectElement | null;
+  const targetTimeValueInput = document.getElementById("target-time-value") as HTMLInputElement | null;
+  const targetTimeUnitSelect = document.getElementById("target-time-unit") as HTMLSelectElement | null;
+  const hashSelect = document.getElementById("hash-algorithm") as HTMLSelectElement | null;
+  const textarea = document.getElementById("passphrase-input") as HTMLTextAreaElement | null;
+
+  if (!generateBtn || !formatSelect || !targetHardwareSelect || !targetTimeValueInput || !targetTimeUnitSelect || !hashSelect || !textarea) return;
+
+  generateBtn.addEventListener("click", () => {
+    const panel = document.getElementById("advanced-generation-panel");
+    const toggleBtn = document.getElementById("toggle-advanced-btn");
+    
+    if (panel && !panel.classList.contains("expanded")) {
+      panel.classList.add("expanded");
+      if (toggleBtn) {
+        toggleBtn.textContent = "×";
+        toggleBtn.setAttribute("aria-label", "Collapse advanced options");
+      }
+    }
+
+    const format = formatSelect.value;
+    if (format === "diceware") return;
+
+    const hardware = targetHardwareSelect.value as HardwareTier;
+    const timeValue = parseFloat(targetTimeValueInput.value) || 1;
+    const timeUnit = targetTimeUnitSelect.value as TimeUnit;
+    const algo = hashSelect.value as Algorithm;
+
+    const requiredGuesses = calculateRequiredGuesses(timeValue, timeUnit, hardware, algo);
+    const passphrase = generateTargetedPassphrase(format as "ascii" | "numeric", requiredGuesses);
+
+    textarea.value = passphrase;
+    textarea.dispatchEvent(new Event("input"));
+  });
+}
+
+function initAdvancedPanelToggle(): void {
+  const toggleBtn = document.getElementById("toggle-advanced-btn");
+  const panel = document.getElementById("advanced-generation-panel");
+  if (!toggleBtn || !panel) return;
+
+  toggleBtn.addEventListener("click", () => {
+    const isExpanded = panel.classList.toggle("expanded");
+    toggleBtn.textContent = isExpanded ? "×" : "+";
+    toggleBtn.setAttribute("aria-label", isExpanded ? "Collapse advanced options" : "Expand advanced options");
+  });
+}
+
+function initDynamicFormatOptionsInteractivity(): void {
+  const formatSelect = document.getElementById("generator-format") as HTMLSelectElement | null;
+  const asciiOptions = document.getElementById("ascii-options");
+  const dicewareOptions = document.getElementById("diceware-options");
+  const separatorInput = document.getElementById("diceware-separator") as HTMLInputElement | null;
+
+  if (formatSelect && asciiOptions && dicewareOptions) {
+    formatSelect.addEventListener("change", () => {
+      const format = formatSelect.value;
+      if (format === "ascii") {
+        asciiOptions.style.display = "flex";
+        dicewareOptions.style.display = "none";
+      } else if (format === "diceware") {
+        asciiOptions.style.display = "none";
+        dicewareOptions.style.display = "flex";
+      }
+    });
+  }
+
+  if (separatorInput) {
+    separatorInput.addEventListener("beforeinput", (e: InputEvent) => {
+      if (e.data && !/^[\x20-\x7E]$/.test(e.data)) {
+        e.preventDefault();
+      }
+    });
+
+    separatorInput.addEventListener("input", () => {
+      const clean = separatorInput.value.replace(/[^\x20-\x7E]/g, "");
+      separatorInput.value = clean.slice(0, 1);
+    });
+
+    separatorInput.addEventListener("blur", () => {
+      if (!separatorInput.value) {
+        separatorInput.value = " ";
+      }
+    });
+  }
 }
