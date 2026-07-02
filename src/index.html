@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
     <meta
       name="description"
       content="KeyStamina - Modern cryptographic passphrase generator, strength analyzer, and heuristic entropy visualization tool."
@@ -44,77 +44,78 @@
         </div>
       </header>
 
-      <section
-        class="section-card section-hash-selector"
-        aria-labelledby="hash-selector-title"
-      >
-        <div class="aligned-settings-row">
-          <div class="label-with-tooltip">
-            <span
-              id="hash-selector-title"
-              class="section-title-label clickable-title"
-              >Target Hash:</span
-            >
-            <div class="tooltip-container">
-              <button
-                class="tooltip-trigger"
-                aria-label="Target hash info"
-                type="button"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="tooltip-icon"
+      <main class="workspace-container">
+        <div class="left-column">
+          <section
+            class="section-card section-hash-selector"
+            aria-labelledby="hash-selector-title"
+          >
+            <div class="aligned-settings-row">
+              <div class="label-with-tooltip">
+                <span
+                  id="hash-selector-title"
+                  class="section-title-label clickable-title"
+                  >Target Hash:</span
                 >
-                  <circle cx="12" cy="12" r="10" stroke-width="1.6" />
-                  <path
-                    d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
-                    stroke-width="2.8"
-                  />
-                  <circle
-                    cx="12"
-                    cy="17"
-                    r="1.4"
-                    fill="currentColor"
-                    stroke="none"
-                  />
-                </svg>
-              </button>
-              <div class="tooltip-content" role="tooltip">
-                Select the hashing algorithm or key derivation function to
-                evaluate the passphrase against. Memory-hard algorithms like
-                Argon2id offer the highest defense against specialized cracking
-                hardware.
+                <div class="tooltip-container">
+                  <button
+                    class="tooltip-trigger"
+                    aria-label="Target hash info"
+                    type="button"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="tooltip-icon"
+                    >
+                      <circle cx="12" cy="12" r="10" stroke-width="1.6" />
+                      <path
+                        d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
+                        stroke-width="2.8"
+                      />
+                      <circle
+                        cx="12"
+                        cy="17"
+                        r="1.4"
+                        fill="currentColor"
+                        stroke="none"
+                      />
+                    </svg>
+                  </button>
+                  <div class="tooltip-content" role="tooltip">
+                    Select the hashing algorithm or key derivation function to
+                    evaluate the passphrase against. Memory-hard algorithms like
+                    Argon2id offer the highest defense against specialized cracking
+                    hardware.
+                  </div>
+                </div>
+              </div>
+              <div class="select-wrapper size-hash-select">
+                <select
+                  id="hash-algorithm"
+                  class="custom-select"
+                  aria-label="Target Hash Algorithm"
+                >
+                  <option value="md5">MD5 / NTLM (Insecure)</option>
+                  <option value="sha256">SHA-256 (Fast Hash)</option>
+                  <option value="pbkdf2">PBKDF2 (Iterated)</option>
+                  <option value="bcrypt">bcrypt (CPU-Hard)</option>
+                  <option value="argon2id" selected>Argon2id (Memory-Hard)</option>
+                </select>
               </div>
             </div>
-          </div>
-          <div class="select-wrapper size-hash-select">
-            <select
-              id="hash-algorithm"
-              class="custom-select"
-              aria-label="Target Hash Algorithm"
-            >
-              <option value="md5">MD5 / NTLM (Insecure)</option>
-              <option value="sha256">SHA-256 (Fast Hash)</option>
-              <option value="pbkdf2">PBKDF2 (Iterated)</option>
-              <option value="bcrypt">bcrypt (CPU-Hard)</option>
-              <option value="argon2id" selected>Argon2id (Memory-Hard)</option>
-            </select>
-          </div>
-        </div>
-      </section>
+          </section>
 
-      <main class="workspace-container">
-        <section
-          class="section-card passphrase-card"
-          aria-labelledby="passphrase-section-title"
-        >
+          <section
+            class="section-card passphrase-card"
+            aria-labelledby="passphrase-section-title"
+          >
           <h2 id="passphrase-section-title" class="sr-only">
             Passphrase Input and Generator
           </h2>
@@ -487,7 +488,65 @@
             </div>
           </div>
         </section>
-      </main>
+      </div>
+
+      <div class="right-column">
+        <section class="section-card terminal-card" aria-label="Telemetry Terminal">
+          <div class="terminal-header">
+            <div class="title-with-tooltip">
+              <h2 class="card-title clickable-title">Cryptographic Telemetry</h2>
+              <div class="tooltip-container">
+                <button
+                  class="tooltip-trigger"
+                  aria-label="Telemetry info"
+                  type="button"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="tooltip-icon"
+                  >
+                    <circle cx="12" cy="12" r="10" stroke-width="1.6" />
+                    <path
+                      d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
+                      stroke-width="2.8"
+                    />
+                    <circle
+                      cx="12"
+                      cy="17"
+                      r="1.4"
+                      fill="currentColor"
+                      stroke="none"
+                    />
+                  </svg>
+                </button>
+                <div class="tooltip-content" role="tooltip">
+                  Real-time cryptographic diagnostics including hash value calculation, keyspace equation proofs, pattern identification and dictionary checks.
+                </div>
+              </div>
+            </div>
+            <div class="terminal-status-wrapper">
+              <span class="terminal-status-dot"></span>
+              <span class="terminal-status">OFFLINE</span>
+            </div>
+          </div>
+          <div class="terminal-body" id="telemetry-output" tabindex="-1">
+            <div class="terminal-line log-system">[SYS] Initializing entropy telemetry sandbox...</div>
+            <div class="terminal-line log-system">[SYS] Hashing engine: hash-wasm (WASM loaded)</div>
+            <div class="terminal-line log-system">[SYS] Entropy estimator: @zxcvbn-ts (Offline dictionary loaded)</div>
+            <div class="terminal-line log-system">[SYS] CSP: Connect-src blocked. WebWorker thread: Spawned.</div>
+            <div class="terminal-line log-info">Ready. Enter passphrase to stream telemetry.</div>
+            <div class="terminal-line log-system">[MONITOR] Awaiting entropy stream...</div>
+          </div>
+        </section>
+      </div>
+    </main>
 
       <footer class="app-footer">
         <a

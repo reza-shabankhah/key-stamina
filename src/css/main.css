@@ -79,6 +79,7 @@ body {
   );
   background-attachment: fixed;
   min-height: 100vh;
+  min-height: 100dvh;
   line-height: 1.5;
   display: flex;
   flex-direction: column;
@@ -107,10 +108,10 @@ textarea {
 
 .global-container {
   width: 100%;
-  max-width: 512px;
+  max-width: calc(512px + 3rem);
   min-width: 375px;
   margin: 0 auto;
-  padding: 2.5rem clamp(0.25rem, calc(12.5% - 2.5rem), 1.5rem);
+  padding: 1.5rem clamp(0.25rem, calc(12.5% - 2.5rem), 1.5rem);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -119,9 +120,10 @@ textarea {
 }
 
 .app-header {
-  border-bottom: 2px double rgba(255, 255, 255, 0.08);
-  padding-bottom: 1.5rem;
-  margin-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 0;
+  padding-bottom: 1rem;
+  margin: 0;
 }
 
 .logo-wrapper {
@@ -132,12 +134,12 @@ textarea {
 }
 
 .app-logo {
-  height: 2.5rem;
+  height: 2.25rem;
   width: auto;
 }
 
 .app-title {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   font-weight: 700;
   letter-spacing: -0.025em;
   display: flex;
@@ -289,7 +291,9 @@ textarea {
 }
 
 .tooltip-container:hover .tooltip-content,
-.tooltip-container:focus-within .tooltip-content {
+.tooltip-container:focus-within .tooltip-content,
+.tooltip-container.is-pinned .tooltip-content,
+.tooltip-trigger[aria-expanded="true"] ~ .tooltip-content {
   visibility: visible;
   opacity: 1;
   transform: translateY(0);
@@ -655,20 +659,28 @@ textarea {
   display: grid;
   grid-template-rows: 0fr;
   opacity: 0;
+  visibility: hidden;
   overflow: hidden;
   margin-top: -1.5rem;
   transition:
     grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.2s ease-out,
-    margin-top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-top 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s linear 0.3s;
 }
 
 .advanced-panel.expanded {
   grid-template-rows: 1fr;
   opacity: 1;
+  visibility: visible;
   margin-top: 0;
   overflow: visible;
   z-index: 5;
+  transition:
+    grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.2s ease-out,
+    margin-top 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s linear 0s;
 }
 
 .advanced-panel-inner {
@@ -850,8 +862,9 @@ textarea {
 
 .app-footer {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 1.5rem;
-  margin-top: 1rem;
+  padding-top: 1rem;
+  padding-bottom: 0;
+  margin: 0;
   display: flex;
   justify-content: center;
 }
@@ -872,6 +885,8 @@ textarea {
 
 .github-icon {
   fill: currentColor;
+  width: 1rem;
+  height: 1rem;
 }
 
 /* Advanced Toggle */
@@ -1002,4 +1017,207 @@ textarea {
 #generator-format {
   text-align: center;
   text-align-last: center;
+}
+
+/* Left/Right Column Layout */
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  min-width: 375px;
+  max-width: 512px;
+  margin: 0 auto;
+}
+
+.right-column {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 375px;
+  max-width: 512px;
+  margin: 0 auto;
+}
+
+/* Terminal Card Component */
+.terminal-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: rgba(4, 5, 8, 0.85);
+  padding: 0;
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--card-border);
+  cursor: default;
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 2.25rem;
+  padding: 0 1.25rem;
+  background: rgba(13, 17, 23, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  user-select: none;
+  position: relative;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.terminal-header .card-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.terminal-status-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  line-height: 1;
+}
+
+.terminal-status-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--text-dim);
+  transition: background-color var(--transition-fast) ease;
+  flex-shrink: 0;
+}
+
+.terminal-status-dot.active {
+  background: var(--accent-neon);
+  box-shadow: 0 0 8px var(--accent-neon);
+  animation: status-pulse 2s infinite ease-in-out;
+}
+
+.terminal-status {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  line-height: 1;
+  transition: color var(--transition-fast) ease;
+}
+
+.terminal-status.active {
+  color: var(--accent-neon);
+}
+
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.terminal-body {
+  flex: 1;
+  min-height: 0;
+  padding: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  cursor: text;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.terminal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.terminal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.terminal-body::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.terminal-line {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.terminal-line.log-system {
+  color: var(--text-dim);
+}
+
+.terminal-line.log-info {
+  color: var(--text-muted);
+}
+
+.terminal-line.log-prompt {
+  color: var(--text-main);
+}
+
+.terminal-line.log-success {
+  color: var(--accent-neon);
+}
+
+.terminal-line.log-warning {
+  color: var(--color-medium);
+}
+
+.terminal-line.log-error {
+  color: var(--color-low);
+}
+
+.cursor-blink {
+  display: inline-block;
+  font-weight: 700;
+  animation: cursor-animation 1.1s steps(2, start) infinite;
+  color: var(--accent-neon);
+}
+
+@keyframes cursor-animation {
+  to { visibility: hidden; }
+}
+
+/* Responsive Layout */
+@media (min-width: 822px) {
+  .global-container {
+    max-width: 1096px;
+  }
+
+  .workspace-container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(375px, 512px));
+    justify-content: center;
+    gap: 1.5rem;
+    align-items: stretch;
+  }
+
+  .left-column,
+  .right-column {
+    max-width: 512px;
+    width: 100%;
+    margin: 0;
+  }
+
+  .right-column {
+    height: 100%;
+    min-height: 0; /* Flexbox lock to prevent row stretching */
+    position: relative; /* Anchor for absolute positioning */
+  }
+
+  .terminal-card {
+    min-height: 0; /* Flexbox lock for the card */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
 }
