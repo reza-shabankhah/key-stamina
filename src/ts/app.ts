@@ -1,9 +1,15 @@
 import "katex/dist/katex.min.css";
 import katex from "katex";
 import {
-  evaluatePassword, calculateCrackTime, formatTime,
-  calculateRequiredGuesses, generateTargetedPassphrase,
-  Algorithm, HardwareTier, TimeUnit, ZxcvbnResult,
+  evaluatePassword,
+  calculateCrackTime,
+  formatTime,
+  calculateRequiredGuesses,
+  generateTargetedPassphrase,
+  Algorithm,
+  HardwareTier,
+  TimeUnit,
+  ZxcvbnResult,
 } from "./crypto";
 
 let latestInputJobId = 0;
@@ -21,21 +27,27 @@ initDynamicFormatOptionsInteractivity();
 
 // Tier → DOM element id; module-level to avoid per-call recreation.
 const TIER_EL_MAP: [HardwareTier, string][] = [
-  ["laptop",        "time-laptop"],
-  ["pc",            "time-pc"],
-  ["server",        "time-server"],
+  ["laptop", "time-laptop"],
+  ["pc", "time-pc"],
+  ["server", "time-server"],
   ["supercomputer", "time-supercomputer"],
 ];
 
 function getAlgo(): Algorithm {
-  return ((document.getElementById("hash-algorithm") as HTMLSelectElement | null)?.value || "argon2id") as Algorithm;
+  return ((
+    document.getElementById("hash-algorithm") as HTMLSelectElement | null
+  )?.value || "argon2id") as Algorithm;
 }
 
 function initPassphraseInput(): void {
-  const textarea  = document.getElementById("passphrase-input") as HTMLTextAreaElement | null;
-  const counter   = document.getElementById("char-counter");
-  const clearBtn  = document.getElementById("clear-input-btn");
-  const copyBtn   = document.getElementById("copy-btn") as HTMLButtonElement | null;
+  const textarea = document.getElementById(
+    "passphrase-input",
+  ) as HTMLTextAreaElement | null;
+  const counter = document.getElementById("char-counter");
+  const clearBtn = document.getElementById("clear-input-btn");
+  const copyBtn = document.getElementById(
+    "copy-btn",
+  ) as HTMLButtonElement | null;
 
   if (!textarea) return;
 
@@ -60,7 +72,7 @@ function initPassphraseInput(): void {
       textarea.value = textarea.value.replace(/[\r\n]/g, "");
     }
 
-    const len        = textarea.value.length;
+    const len = textarea.value.length;
     const hasContent = len > 0;
 
     if (counter) counter.textContent = hasContent ? ` (${len})` : "";
@@ -85,7 +97,7 @@ function initPassphraseInput(): void {
       evaluateTimeout = window.setTimeout(() => {
         const currentJobId = ++latestInputJobId;
         const algo = getAlgo();
-        evaluatePassword(textarea.value, algo).then(result => {
+        evaluatePassword(textarea.value, algo).then((result) => {
           if (!result || currentJobId !== latestInputJobId) return;
           updateCrackTimes(result.guesses);
           updateResistanceBadge(result.score);
@@ -105,7 +117,8 @@ function initPassphraseInput(): void {
 
   if (copyBtn) {
     copyBtn.addEventListener("click", () => {
-      if (copyBtn.classList.contains("btn-unsupported") || !textarea.value) return;
+      if (copyBtn.classList.contains("btn-unsupported") || !textarea.value)
+        return;
 
       const onSuccess = () => {
         copyBtn.textContent = "Copied!";
@@ -119,13 +132,18 @@ function initPassphraseInput(): void {
         document.body.appendChild(el);
         el.focus();
         el.select();
-        try { document.execCommand("copy"); } catch {}
+        try {
+          document.execCommand("copy");
+        } catch {}
         document.body.removeChild(el);
         onSuccess();
       };
 
       if (navigator.clipboard?.writeText) {
-        navigator.clipboard.writeText(textarea.value).then(onSuccess).catch(fallbackCopy);
+        navigator.clipboard
+          .writeText(textarea.value)
+          .then(onSuccess)
+          .catch(fallbackCopy);
       } else {
         fallbackCopy();
       }
@@ -152,7 +170,9 @@ function initPassphraseInput(): void {
 }
 
 function initTargetTimeValueInput(): void {
-  const input = document.getElementById("target-time-value") as HTMLInputElement | null;
+  const input = document.getElementById(
+    "target-time-value",
+  ) as HTMLInputElement | null;
   if (!input) return;
 
   input.addEventListener("beforeinput", (e: InputEvent) => {
@@ -166,60 +186,74 @@ function initTargetTimeValueInput(): void {
 
   input.addEventListener("blur", () => {
     const num = parseInt(input.value, 10);
-    input.value = !input.value || isNaN(num) ? "1" : String(Math.min(Math.max(num, 0), 999));
+    input.value =
+      !input.value || isNaN(num)
+        ? "1"
+        : String(Math.min(Math.max(num, 0), 999));
   });
 }
 
 function initBorderMaskHandling(): void {
-  const textarea   = document.getElementById("passphrase-input");
-  const borderBox  = document.querySelector(".passphrase-border-box") as HTMLElement | null;
-  const labelCore  = document.querySelector(".label-core") as HTMLElement | null;
+  const textarea = document.getElementById("passphrase-input");
+  const borderBox = document.querySelector(
+    ".passphrase-border-box",
+  ) as HTMLElement | null;
+  const labelCore = document.querySelector(".label-core") as HTMLElement | null;
   const charCounter = document.getElementById("char-counter");
-  const clearBtn   = document.getElementById("clear-input-btn");
+  const clearBtn = document.getElementById("clear-input-btn");
 
   if (!textarea || !borderBox || !labelCore) return;
 
   const visualLeftGap = 4.0;
   const visualRightGap = 2.0;
-  const labelLeft  = 15.2; // 0.95rem CSS match
+  const labelLeft = 15.2; // 0.95rem CSS match
   const leftPadding = 2.4; // 0.2rem CSS padding scaled
 
   let maskRaf: number;
   const updateMask = () => {
     cancelAnimationFrame(maskRaf);
     maskRaf = requestAnimationFrame(() => {
-      const counterWidth   = charCounter?.textContent ? charCounter.offsetWidth : 0;
+      const counterWidth = charCounter?.textContent
+        ? charCounter.offsetWidth
+        : 0;
       const scaledTextWidth = (labelCore.offsetWidth + counterWidth) * 0.75;
-      const maskLeft       = labelLeft + leftPadding - visualLeftGap;
-      const maskWidth      = visualLeftGap + scaledTextWidth + visualRightGap;
+      const maskLeft = labelLeft + leftPadding - visualLeftGap;
+      const maskWidth = visualLeftGap + scaledTextWidth + visualRightGap;
 
       borderBox.style.setProperty("--mask-width", `${maskWidth}px`);
-      borderBox.style.setProperty("--mask-left",  `${maskLeft}px`);
+      borderBox.style.setProperty("--mask-left", `${maskLeft}px`);
     });
   };
 
   updateMask();
-  textarea.addEventListener("input",  updateMask);
-  textarea.addEventListener("focus",  updateMask);
-  textarea.addEventListener("blur",   updateMask);
-  window.addEventListener("resize",   updateMask);
+  textarea.addEventListener("input", updateMask);
+  textarea.addEventListener("focus", updateMask);
+  textarea.addEventListener("blur", updateMask);
+  window.addEventListener("resize", updateMask);
   if (clearBtn) clearBtn.addEventListener("click", updateMask);
 }
 
 function initMobileAutoScroll(): void {
-  const textarea = document.getElementById("passphrase-input") as HTMLTextAreaElement | null;
-  const card     = document.querySelector(".passphrase-card") as HTMLElement | null;
+  const textarea = document.getElementById(
+    "passphrase-input",
+  ) as HTMLTextAreaElement | null;
+  const card = document.querySelector(".passphrase-card") as HTMLElement | null;
 
   if (!textarea || !card) return;
 
   let isMobile = false;
-  const checkMobile = () => { isMobile = window.innerWidth <= 768; };
+  const checkMobile = () => {
+    isMobile = window.innerWidth <= 768;
+  };
   window.addEventListener("resize", checkMobile);
   checkMobile();
 
   textarea.addEventListener("focus", () => {
     if (!isMobile) return;
-    setTimeout(() => card.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+    setTimeout(
+      () => card.scrollIntoView({ behavior: "smooth", block: "start" }),
+      300,
+    );
   });
 
   let blurScrollY = 0;
@@ -257,7 +291,8 @@ function initMobileAutoScroll(): void {
 }
 
 function initTooltips(): void {
-  const triggers = document.querySelectorAll<HTMLButtonElement>(".tooltip-trigger");
+  const triggers =
+    document.querySelectorAll<HTMLButtonElement>(".tooltip-trigger");
 
   const unpinAllTooltips = (exceptTrigger?: HTMLButtonElement) => {
     triggers.forEach((btn) => {
@@ -270,7 +305,7 @@ function initTooltips(): void {
 
   const togglePinTooltip = (trigger: HTMLButtonElement) => {
     const container = trigger.closest(".tooltip-container");
-    const isPinned  = trigger.getAttribute("aria-expanded") === "true";
+    const isPinned = trigger.getAttribute("aria-expanded") === "true";
 
     if (isPinned) {
       trigger.setAttribute("aria-expanded", "false");
@@ -292,35 +327,46 @@ function initTooltips(): void {
     });
   });
 
-  document.querySelectorAll<HTMLElement>(".clickable-title").forEach((title) => {
-    title.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const container = title.closest(
-        ".label-with-tooltip, .title-with-tooltip, .aligned-settings-row, .section-card, .terminal-header",
-      );
-      const trigger = container?.querySelector<HTMLButtonElement>(".tooltip-trigger");
-      if (trigger) togglePinTooltip(trigger);
+  document
+    .querySelectorAll<HTMLElement>(".clickable-title")
+    .forEach((title) => {
+      title.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const container = title.closest(
+          ".label-with-tooltip, .title-with-tooltip, .aligned-settings-row, .section-card, .terminal-header",
+        );
+        const trigger =
+          container?.querySelector<HTMLButtonElement>(".tooltip-trigger");
+        if (trigger) togglePinTooltip(trigger);
+      });
     });
-  });
 
   document.addEventListener("click", (e) => {
     const target = e.target as HTMLElement | null;
-    if (target && !target.closest(".tooltip-container") && !target.closest(".clickable-title")) {
+    if (
+      target &&
+      !target.closest(".tooltip-container") &&
+      !target.closest(".clickable-title")
+    ) {
       unpinAllTooltips();
     }
   });
 }
 
 function initHashSelector(): void {
-  const hashSelect = document.getElementById("hash-algorithm") as HTMLSelectElement | null;
-  const textarea   = document.getElementById("passphrase-input") as HTMLTextAreaElement | null;
+  const hashSelect = document.getElementById(
+    "hash-algorithm",
+  ) as HTMLSelectElement | null;
+  const textarea = document.getElementById(
+    "passphrase-input",
+  ) as HTMLTextAreaElement | null;
   if (!hashSelect || !textarea) return;
 
   hashSelect.addEventListener("change", () => {
     if (!textarea.value.length) return;
     const currentJobId = ++latestInputJobId;
     const algo = hashSelect.value as Algorithm;
-    evaluatePassword(textarea.value, algo).then(result => {
+    evaluatePassword(textarea.value, algo).then((result) => {
       if (!result || currentJobId !== latestInputJobId) return;
       updateCrackTimes(result.guesses);
       updateTerminalTelemetry(textarea.value, result, algo);
@@ -334,9 +380,9 @@ function updateCrackTimes(guesses: number): void {
     const el = document.getElementById(elId);
     if (!el) continue;
     const formatted = formatTime(calculateCrackTime(guesses, tier, algo));
-    const valEl  = el.querySelector(".time-value");
+    const valEl = el.querySelector(".time-value");
     const unitEl = el.querySelector(".time-unit");
-    if (valEl)  valEl.textContent  = formatted.value;
+    if (valEl) valEl.textContent = formatted.value;
     if (unitEl) unitEl.textContent = formatted.unit;
   }
 }
@@ -345,9 +391,9 @@ function resetCrackTimes(): void {
   for (const [, elId] of TIER_EL_MAP) {
     const el = document.getElementById(elId);
     if (!el) continue;
-    const valEl  = el.querySelector(".time-value");
+    const valEl = el.querySelector(".time-value");
     const unitEl = el.querySelector(".time-unit");
-    if (valEl)  valEl.textContent  = "  0";
+    if (valEl) valEl.textContent = "  0";
     if (unitEl) unitEl.textContent = "Seconds";
   }
 }
@@ -377,18 +423,39 @@ function resetResistanceBadge(): void {
 }
 
 function initGenerateButton(): void {
-  const generateBtn          = document.getElementById("generate-btn");
-  const formatSelect         = document.getElementById("generator-format") as HTMLSelectElement | null;
-  const targetHardwareSelect = document.getElementById("target-hardware") as HTMLSelectElement | null;
-  const targetTimeValueInput = document.getElementById("target-time-value") as HTMLInputElement | null;
-  const targetTimeUnitSelect = document.getElementById("target-time-unit") as HTMLSelectElement | null;
-  const hashSelect           = document.getElementById("hash-algorithm") as HTMLSelectElement | null;
-  const textarea             = document.getElementById("passphrase-input") as HTMLTextAreaElement | null;
+  const generateBtn = document.getElementById("generate-btn");
+  const formatSelect = document.getElementById(
+    "generator-format",
+  ) as HTMLSelectElement | null;
+  const targetHardwareSelect = document.getElementById(
+    "target-hardware",
+  ) as HTMLSelectElement | null;
+  const targetTimeValueInput = document.getElementById(
+    "target-time-value",
+  ) as HTMLInputElement | null;
+  const targetTimeUnitSelect = document.getElementById(
+    "target-time-unit",
+  ) as HTMLSelectElement | null;
+  const hashSelect = document.getElementById(
+    "hash-algorithm",
+  ) as HTMLSelectElement | null;
+  const textarea = document.getElementById(
+    "passphrase-input",
+  ) as HTMLTextAreaElement | null;
 
-  if (!generateBtn || !formatSelect || !targetHardwareSelect || !targetTimeValueInput || !targetTimeUnitSelect || !hashSelect || !textarea) return;
+  if (
+    !generateBtn ||
+    !formatSelect ||
+    !targetHardwareSelect ||
+    !targetTimeValueInput ||
+    !targetTimeUnitSelect ||
+    !hashSelect ||
+    !textarea
+  )
+    return;
 
   generateBtn.addEventListener("click", () => {
-    const panel     = document.getElementById("advanced-generation-panel");
+    const panel = document.getElementById("advanced-generation-panel");
     const toggleBtn = document.getElementById("toggle-advanced-btn");
 
     if (panel && !panel.classList.contains("expanded")) {
@@ -402,39 +469,54 @@ function initGenerateButton(): void {
     const format = formatSelect.value;
     if (format === "diceware") return;
 
-    const hardware       = targetHardwareSelect.value as HardwareTier;
-    const timeValue      = parseFloat(targetTimeValueInput.value) || 1;
-    const timeUnit       = targetTimeUnitSelect.value as TimeUnit;
-    const algo           = hashSelect.value as Algorithm;
-    const requiredGuesses = calculateRequiredGuesses(timeValue, timeUnit, hardware, algo);
+    const hardware = targetHardwareSelect.value as HardwareTier;
+    const timeValue = parseFloat(targetTimeValueInput.value) || 1;
+    const timeUnit = targetTimeUnitSelect.value as TimeUnit;
+    const algo = hashSelect.value as Algorithm;
+    const requiredGuesses = calculateRequiredGuesses(
+      timeValue,
+      timeUnit,
+      hardware,
+      algo,
+    );
 
-    textarea.value = generateTargetedPassphrase(format as "ascii" | "numeric", requiredGuesses);
+    textarea.value = generateTargetedPassphrase(
+      format as "ascii" | "numeric",
+      requiredGuesses,
+    );
     textarea.dispatchEvent(new Event("input"));
   });
 }
 
 function initAdvancedPanelToggle(): void {
   const toggleBtn = document.getElementById("toggle-advanced-btn");
-  const panel     = document.getElementById("advanced-generation-panel");
+  const panel = document.getElementById("advanced-generation-panel");
   if (!toggleBtn || !panel) return;
 
   toggleBtn.addEventListener("click", () => {
     const isExpanded = panel.classList.toggle("expanded");
     toggleBtn.textContent = isExpanded ? "×" : "+";
-    toggleBtn.setAttribute("aria-label", isExpanded ? "Collapse advanced options" : "Expand advanced options");
+    toggleBtn.setAttribute(
+      "aria-label",
+      isExpanded ? "Collapse advanced options" : "Expand advanced options",
+    );
   });
 }
 
 function initDynamicFormatOptionsInteractivity(): void {
-  const formatSelect    = document.getElementById("generator-format") as HTMLSelectElement | null;
-  const asciiOptions    = document.getElementById("ascii-options");
+  const formatSelect = document.getElementById(
+    "generator-format",
+  ) as HTMLSelectElement | null;
+  const asciiOptions = document.getElementById("ascii-options");
   const dicewareOptions = document.getElementById("diceware-options");
-  const separatorInput  = document.getElementById("diceware-separator") as HTMLInputElement | null;
+  const separatorInput = document.getElementById(
+    "diceware-separator",
+  ) as HTMLInputElement | null;
 
   if (formatSelect && asciiOptions && dicewareOptions) {
     formatSelect.addEventListener("change", () => {
       const isDiceware = formatSelect.value === "diceware";
-      asciiOptions.style.display    = isDiceware ? "none" : "flex";
+      asciiOptions.style.display = isDiceware ? "none" : "flex";
       dicewareOptions.style.display = isDiceware ? "flex" : "none";
     });
   }
@@ -444,7 +526,9 @@ function initDynamicFormatOptionsInteractivity(): void {
       if (e.data && !/^[\x20-\x7E]$/.test(e.data)) e.preventDefault();
     });
     separatorInput.addEventListener("input", () => {
-      separatorInput.value = separatorInput.value.replace(/[^\x20-\x7E]/g, "").slice(0, 1);
+      separatorInput.value = separatorInput.value
+        .replace(/[^\x20-\x7E]/g, "")
+        .slice(0, 1);
     });
     separatorInput.addEventListener("blur", () => {
       if (!separatorInput.value) separatorInput.value = " ";
@@ -452,7 +536,10 @@ function initDynamicFormatOptionsInteractivity(): void {
   }
 }
 
-function buildPatternLines(sequence: any[]): { lines: string[]; inCommonPasswords: boolean } {
+function buildPatternLines(sequence: any[]): {
+  lines: string[];
+  inCommonPasswords: boolean;
+} {
   const lines: string[] = [];
   let inCommonPasswords = false;
 
@@ -464,7 +551,9 @@ function buildPatternLines(sequence: any[]): { lines: string[]; inCommonPassword
       if (dictionary === "passwords") inCommonPasswords = true;
 
       if (match.l33t) {
-        const subs = Object.entries(match.sub ?? {}).map(([k, v]) => `${k}→${v}`).join(", ");
+        const subs = Object.entries(match.sub ?? {})
+          .map(([k, v]) => `${k}→${v}`)
+          .join(", ");
         desc = `• Dict Match: "${match.token}" → "${match.matchedWord}" (${dictionary}) [l33t: ${subs}]`;
       } else {
         desc = `• Dict Match: "${match.token}" → "${match.matchedWord}" (${dictionary})`;
@@ -480,7 +569,9 @@ function buildPatternLines(sequence: any[]): { lines: string[]; inCommonPassword
     }
 
     if (desc) {
-      lines.push(`<div class="terminal-line log-warning" style="padding-left: 1rem;">${desc}</div>`);
+      lines.push(
+        `<div class="terminal-line log-warning" style="padding-left: 1rem;">${desc}</div>`,
+      );
     }
   }
 
@@ -490,11 +581,11 @@ function buildPatternLines(sequence: any[]): { lines: string[]; inCommonPassword
 function updateTerminalTelemetry(
   password: string,
   result: ZxcvbnResult,
-  algo: Algorithm
+  algo: Algorithm,
 ): void {
   const terminalBody = document.getElementById("telemetry-output");
-  const statusDot    = document.querySelector(".terminal-status-dot");
-  const statusText   = document.querySelector(".terminal-status");
+  const statusDot = document.querySelector(".terminal-status-dot");
+  const statusText = document.querySelector(".terminal-status");
   if (!terminalBody) return;
 
   if (statusDot) statusDot.classList.add("active");
@@ -511,21 +602,29 @@ function updateTerminalTelemetry(
   ];
 
   try {
-    const log2Guesses  = Math.log2(result.guesses);
-    const entropyBits  = log2Guesses.toFixed(2);
+    const log2Guesses = Math.log2(result.guesses);
+    const entropyBits = log2Guesses.toFixed(2);
     const log10Guesses = log2Guesses / Math.log2(10); // log10 via log2 change-of-base
 
-    const guessesSci = result.guesses >= 1000
-      ? (() => {
-          const exponent    = Math.floor(log10Guesses);
-          const coefficient = (result.guesses / 10 ** exponent).toFixed(2);
-          return `${coefficient} \\times 10^{${exponent}}`;
-        })()
-      : String(result.guesses);
+    const guessesSci =
+      result.guesses >= 1000
+        ? (() => {
+            const exponent = Math.floor(log10Guesses);
+            const coefficient = (result.guesses / 10 ** exponent).toFixed(2);
+            return `${coefficient} \\times 10^{${exponent}}`;
+          })()
+        : String(result.guesses);
 
-    const eqGuesses = katex.renderToString(`G \\approx ${guessesSci}`, { throwOnError: false });
-    const eqEntropy = katex.renderToString(`E = \\log_2(G) \\approx ${entropyBits} \\text{ bits}`, { throwOnError: false });
-    const eqVerify  = katex.renderToString(`2^{${entropyBits}} \\approx G`, { throwOnError: false });
+    const eqGuesses = katex.renderToString(`G \\approx ${guessesSci}`, {
+      throwOnError: false,
+    });
+    const eqEntropy = katex.renderToString(
+      `E = \\log_2(G) \\approx ${entropyBits} \\text{ bits}`,
+      { throwOnError: false },
+    );
+    const eqVerify = katex.renderToString(`2^{${entropyBits}} \\approx G`, {
+      throwOnError: false,
+    });
 
     lines.push(`<div class="terminal-line log-info" style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.25rem;">
       <div>• Guesses: ${eqGuesses}</div>
@@ -533,26 +632,38 @@ function updateTerminalTelemetry(
       <div>• Equation: ${eqVerify}</div>
     </div>`);
   } catch {
-    lines.push(`<div class="terminal-line log-error">• KaTeX rendering failed</div>`);
+    lines.push(
+      `<div class="terminal-line log-error">• KaTeX rendering failed</div>`,
+    );
   }
 
-  lines.push(`<div class="terminal-line log-system">[PATTERN] Telemetry analysis:</div>`);
+  lines.push(
+    `<div class="terminal-line log-system">[PATTERN] Telemetry analysis:</div>`,
+  );
 
-  const { lines: patternLines, inCommonPasswords } = buildPatternLines(result.sequence ?? []);
+  const { lines: patternLines, inCommonPasswords } = buildPatternLines(
+    result.sequence ?? [],
+  );
 
   if (patternLines.length > 0) {
     lines.push(...patternLines);
   } else {
-    lines.push(`<div class="terminal-line log-info" style="padding-left: 1rem;">• No heuristic patterns detected. Brute-force verification required.</div>`);
+    lines.push(
+      `<div class="terminal-line log-info" style="padding-left: 1rem;">• No heuristic patterns detected. Brute-force verification required.</div>`,
+    );
   }
 
-  lines.push(`<div class="terminal-line log-system">[DICTIONARY] Database check:</div>`);
+  lines.push(
+    `<div class="terminal-line log-system">[DICTIONARY] Database check:</div>`,
+  );
   lines.push(
     inCommonPasswords
       ? `<div class="terminal-line log-error" style="padding-left: 1rem; font-weight: bold;">[!] DANGER: Base password found in top-passwords lists!</div>`
-      : `<div class="terminal-line log-success" style="padding-left: 1rem;">[✓] Passphrase structure clean from common password lists.</div>`
+      : `<div class="terminal-line log-success" style="padding-left: 1rem;">[✓] Passphrase structure clean from common password lists.</div>`,
   );
-  lines.push(`<div class="terminal-line log-system">[MONITOR] Telemetry stream updated.</div>`);
+  lines.push(
+    `<div class="terminal-line log-system">[MONITOR] Telemetry stream updated.</div>`,
+  );
 
   terminalBody.innerHTML = lines.join("");
   terminalBody.scrollTop = terminalBody.scrollHeight;
@@ -560,8 +671,8 @@ function updateTerminalTelemetry(
 
 function resetTerminalTelemetry(): void {
   const terminalBody = document.getElementById("telemetry-output");
-  const statusDot    = document.querySelector(".terminal-status-dot");
-  const statusText   = document.querySelector(".terminal-status");
+  const statusDot = document.querySelector(".terminal-status-dot");
+  const statusText = document.querySelector(".terminal-status");
   if (!terminalBody) return;
 
   if (statusDot) statusDot.classList.remove("active");
