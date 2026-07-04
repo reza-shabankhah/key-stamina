@@ -1,155 +1,94 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
-    <meta
-      name="description"
-      content="KeyStamina - Modern cryptographic passphrase generator, strength analyzer, and heuristic entropy visualization tool."
-    />
-    <meta name="color-scheme" content="dark" />
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; worker-src blob:; connect-src 'none';"
-    />
-    <title>KeyStamina - Passphrase Strength &amp; Entropy Analyzer</title>
 
-    <link rel="stylesheet" href="css/main.css" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+  <meta name="description"
+    content="KeyStamina - Modern cryptographic passphrase generator, strength analyzer, and heuristic entropy visualization tool." />
+  <meta name="color-scheme" content="dark" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; worker-src blob:; connect-src 'none';" />
+  <title>KeyStamina - Passphrase Strength &amp; Entropy Analyzer</title>
 
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAFhElEQVRYha1Wa2wUVRT+zrzubNvd6ZZIW2obsPIoDxWjFpEGTYySJqCGH0ZCJCFCDGqQGE2MGIUYEDWK/CAxBjVqNFEJBvARjQ/kFVkQEii0vCJUdrZCYbvtdndmZ+b4o+126e52uoaTTDJzzne+893H3HsIJVrwn+A4WbGXMmMRgImD7ovE2OW51ieJelwthY9KAYei+lIibzNA4wAkAD4JkAZgOgAdQA8Tr0rU2F+Uwju24qZYZZjCqzRFNBTTlqAN2lCsOobySlNfZph6t2EKNqL6yhtavCKqNRmmsA1TXAxHAw3FcOFooMEwRcwwRaayS739hgkwTP1LwxQcMkWrH7Yypj1imIIrY9rnN6Y6QzJM7YphigvgMewZhmSY4rJh6t1jwUt+gKpooG5w0x0GgYf84WigIRTTnqg09SeNLv2WbALBA+gXgKuCl4JVfvz+I2qDFg7rzQ6TJ5N3NxPuA+FeMOpyYQxECbSfifcB0iEASFSnDg0IKlFAqBNVkMU9EtEcBrcAaAZQ7iv2eksCOESgfR74oJS2DsYnIe4rwIiJHRg4ZIouD8e8fzM/8jmvix0AkGpIVRdQI1VLN40iyAVoe09t+vFcp5LPjqkFi7twrc3OQWubO4770ARgPNVQRG5Ev/M3KLWek6SiWzyvXBUr5TmQ8jhkgGeNpM0XUEj6Oe5MttpJTmFerl9bJKX0tcr8oW9nr3eif7UTsN5zzlTs1DRpKk3y4/b9C7wOvtD3oK1zCtNGxuzP3Oq+++2D/auc390j3K7MlZokHTbbCPYusCvco9zhxz/qDHA/kr2tNsNFwbXlFKa65xnueReZ3S6goBOE8aGIpltb3ON9i+1JoZMiTTr0YjVGnYH+1XYEmeyN528O6uFBQAL09cp8uZpiqRecw6OlFN/paaSdn3j2aMlyHf1JtRS5zuliQnJxph0AApvVYGa3Ox02XAAgDB9kvgKcX72TYBiFYlRHESrDKeVRydYWSikqQwfVUHak7jlu5pjXJTdTEySkMvu9NgBg5B9KRQW4Ea+3WEyZIyVDx8REdYncqC6Tbw0eFfXKfCmZA5GTTzmn05ucvZBhu4eyXHkCim5CL1ksAmS+dWekJ+Cw/qLSAgDW+86+zFfudf+428F1nunF4SLoJQaWAFzCEsgNpBaLBV5VzsqzpVDmay+S2e5FpFlSKLBJOZuLKftA7Qsd0e6kMHUqk2mgeSlwL+TNAAPdBEB5SKrHW4UFpNY5M8Go0F9WDgBAeo1zF4DUsHpcVlukaUgjxd08WZkrXQEAIvT7CiDgBIB58hSqpyBOcS+a8hQwggCQ3ujcMZyGsqGweFpuh4qW9GZnL5UjJE2hge7Iw5GRVHlLQIQfht4DG1Sr8BxkrRwjb0lCQiyXZvA1umZtdSfrG9TsqF0JPxcYcN7oFCMm2gE0AkDfY/Y+9wjPy8ONJAqiTTyn9Fgfujr3cJiCFJcnIl6+Q3tgEHK6p8Zq8usPAADhmFhomIINU7DRKRx5Bh2ACh75yLfR3rJP1WPBv9TYEL5il3YcKtLyLPrDuCQyg34vFBUP+xbONcMUb2dFRIUnnpH3QEM8V4B4Vt5jmIJDJ8TlsneViDyF9kNDt1gj/2ZEhZfNN/U3i85cUQUMCsW0jwm0LOvqRdx6xzlq7/QMvsqNYGggOGAQhem0tkhKiJeU2RTMOUEZ23pqrRW5/eTYBAyLWEug11Fgw3IPktAAChRs15hAb8Rr0q8VK+4vYNBCpmgl4CMA1WPBE2B6wIpErfWdH9a3IQGARK31PWyriRhbANijQDMAtnqONXMsxQfFlmZVlwL1ruytBWM5hg8yBugblvmVxHjrTCl8JQsYsmBUmyaRtA4AyHU3xm/OHPs/PP8B8iE27qLYlaMAAAAASUVORK5CYII="
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAACMklEQVQ4jXVSy2oUQRQ9t/pR3UnP9DhGSUTFJ0QkuhADUYjBtegHuHCTbMSFWxchIBKJgki2rgTBD5AEJuhGzShujCgxJAYXYvf4iCYzTib9qLquHOeVAwWXw7mnzr1VhA7o/t7da6bpLQDDIBABBaXsicreylqrVrQSewJ0WSp9RkQvN/qi/o3eqF8TzwsjKeAznE4XNsEPnLFcKKdb+WxJ3suFzpVW3mxzIP2bCfN+yRkF6zMMCCLxAqyLYE7b5P+KXCCva8J5AoYA9EBBqXe8CgDGAB2ABRvgNQYVQXha7o2mmwz8UP4A0IMESfVqPJ/O8QnyEDrj5p/0DdegAfe2OUguugD83OiLdrUvkcHl4XghLfAIGHmu4ODWzdRDDdAftVm9GL8FQze2NBnED9Qr/sqn64SBTa6iL5lRI4gh5A3TjR+q4vYGj1V9JPKw6I6bK+64uUQeFtUqD6ECncyoCPifovkVIhj1WsEQh8kDAVAQACh5ratchmw0aEwQiLMiqq+jhiObY4m7OZq4XMNRcvBJjhqHxHGhGGj7kfADZzK7LNfhoAQL3HhoBz4Yx6hoDNLz7JJc90M51ZaAoq07lEE5U7Br5GIZACiPBa9ol9y7Vgwb3DVl7SMfJSGjyXpfY4pMYPcLollo7E9m9ftkTldAIOuc8KxLYgAGVtnAhfLuaKWjAQBkvyAvTPs+gy43JGQCPxJ2fO3XTpTb5u+E3DfrZC6UT/xQzviBdWo73V+0dN/0q4LlxgAAAABJRU5ErkJggg=="
-    />
-  </head>
-  <body>
-    <div class="global-container">
-      <header class="app-header">
-        <div class="logo-wrapper">
-          <img
-            src="assets/img/logo.svg"
-            alt="KeyStamina Logo"
-            class="app-logo"
-          />
-          <h1 class="app-title">
-            KeyStamina <span class="app-version">v1.0</span>
-          </h1>
-        </div>
-      </header>
+  <link rel="stylesheet" href="css/main.css" />
 
-      <main class="workspace-container">
-        <div class="left-column">
-          <section
-            class="section-card section-hash-selector"
-            aria-labelledby="hash-selector-title"
-          >
-            <div class="aligned-settings-row">
-              <div class="label-with-tooltip">
-                <span
-                  id="hash-selector-title"
-                  class="section-title-label clickable-title"
-                  >Target Hash:</span
-                >
-                <div class="tooltip-container">
-                  <button
-                    class="tooltip-trigger"
-                    aria-label="Target hash info"
-                    type="button"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="15"
-                      height="15"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      class="tooltip-icon"
-                    >
-                      <circle cx="12" cy="12" r="10" stroke-width="1.6" />
-                      <path
-                        d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
-                        stroke-width="2.8"
-                      />
-                      <circle
-                        cx="12"
-                        cy="17"
-                        r="1.4"
-                        fill="currentColor"
-                        stroke="none"
-                      />
-                    </svg>
-                  </button>
-                  <div class="tooltip-content" role="tooltip">
-                    Select the hashing algorithm or key derivation function to
-                    evaluate the passphrase against. Memory-hard algorithms like
-                    Argon2id offer the highest defense against specialized cracking
-                    hardware.
-                  </div>
+  <link rel="icon" type="image/png" sizes="32x32"
+    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAFhElEQVRYha1Wa2wUVRT+zrzubNvd6ZZIW2obsPIoDxWjFpEGTYySJqCGH0ZCJCFCDGqQGE2MGIUYEDWK/CAxBjVqNFEJBvARjQ/kFVkQEii0vCJUdrZCYbvtdndmZ+b4o+126e52uoaTTDJzzne+893H3HsIJVrwn+A4WbGXMmMRgImD7ovE2OW51ieJelwthY9KAYei+lIibzNA4wAkAD4JkAZgOgAdQA8Tr0rU2F+Uwju24qZYZZjCqzRFNBTTlqAN2lCsOobySlNfZph6t2EKNqL6yhtavCKqNRmmsA1TXAxHAw3FcOFooMEwRcwwRaayS739hgkwTP1LwxQcMkWrH7Yypj1imIIrY9rnN6Y6QzJM7YphigvgMewZhmSY4rJh6t1jwUt+gKpooG5w0x0GgYf84WigIRTTnqg09SeNLv2WbALBA+gXgKuCl4JVfvz+I2qDFg7rzQ6TJ5N3NxPuA+FeMOpyYQxECbSfifcB0iEASFSnDg0IKlFAqBNVkMU9EtEcBrcAaAZQ7iv2eksCOESgfR74oJS2DsYnIe4rwIiJHRg4ZIouD8e8fzM/8jmvix0AkGpIVRdQI1VLN40iyAVoe09t+vFcp5LPjqkFi7twrc3OQWubO4770ARgPNVQRG5Ev/M3KLWek6SiWzyvXBUr5TmQ8jhkgGeNpM0XUEj6Oe5MttpJTmFerl9bJKX0tcr8oW9nr3eif7UTsN5zzlTs1DRpKk3y4/b9C7wOvtD3oK1zCtNGxuzP3Oq+++2D/auc390j3K7MlZokHTbbCPYusCvco9zhxz/qDHA/kr2tNsNFwbXlFKa65xnueReZ3S6goBOE8aGIpltb3ON9i+1JoZMiTTr0YjVGnYH+1XYEmeyN528O6uFBQAL09cp8uZpiqRecw6OlFN/paaSdn3j2aMlyHf1JtRS5zuliQnJxph0AApvVYGa3Ox02XAAgDB9kvgKcX72TYBiFYlRHESrDKeVRydYWSikqQwfVUHak7jlu5pjXJTdTEySkMvu9NgBg5B9KRQW4Ea+3WEyZIyVDx8REdYncqC6Tbw0eFfXKfCmZA5GTTzmn05ucvZBhu4eyXHkCim5CL1ksAmS+dWekJ+Cw/qLSAgDW+86+zFfudf+428F1nunF4SLoJQaWAFzCEsgNpBaLBV5VzsqzpVDmay+S2e5FpFlSKLBJOZuLKftA7Qsd0e6kMHUqk2mgeSlwL+TNAAPdBEB5SKrHW4UFpNY5M8Go0F9WDgBAeo1zF4DUsHpcVlukaUgjxd08WZkrXQEAIvT7CiDgBIB58hSqpyBOcS+a8hQwggCQ3ujcMZyGsqGweFpuh4qW9GZnL5UjJE2hge7Iw5GRVHlLQIQfht4DG1Sr8BxkrRwjb0lCQiyXZvA1umZtdSfrG9TsqF0JPxcYcN7oFCMm2gE0AkDfY/Y+9wjPy8ONJAqiTTyn9Fgfujr3cJiCFJcnIl6+Q3tgEHK6p8Zq8usPAADhmFhomIINU7DRKRx5Bh2ACh75yLfR3rJP1WPBv9TYEL5il3YcKtLyLPrDuCQyg34vFBUP+xbONcMUb2dFRIUnnpH3QEM8V4B4Vt5jmIJDJ8TlsneViDyF9kNDt1gj/2ZEhZfNN/U3i85cUQUMCsW0jwm0LOvqRdx6xzlq7/QMvsqNYGggOGAQhem0tkhKiJeU2RTMOUEZ23pqrRW5/eTYBAyLWEug11Fgw3IPktAAChRs15hAb8Rr0q8VK+4vYNBCpmgl4CMA1WPBE2B6wIpErfWdH9a3IQGARK31PWyriRhbANijQDMAtnqONXMsxQfFlmZVlwL1ruytBWM5hg8yBugblvmVxHjrTCl8JQsYsmBUmyaRtA4AyHU3xm/OHPs/PP8B8iE27qLYlaMAAAAASUVORK5CYII=" />
+  <link rel="icon" type="image/png" sizes="16x16"
+    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAACMklEQVQ4jXVSy2oUQRQ9t/pR3UnP9DhGSUTFJ0QkuhADUYjBtegHuHCTbMSFWxchIBKJgki2rgTBD5AEJuhGzShujCgxJAYXYvf4iCYzTib9qLquHOeVAwWXw7mnzr1VhA7o/t7da6bpLQDDIBABBaXsicreylqrVrQSewJ0WSp9RkQvN/qi/o3eqF8TzwsjKeAznE4XNsEPnLFcKKdb+WxJ3suFzpVW3mxzIP2bCfN+yRkF6zMMCCLxAqyLYE7b5P+KXCCva8J5AoYA9EBBqXe8CgDGAB2ABRvgNQYVQXha7o2mmwz8UP4A0IMESfVqPJ/O8QnyEDrj5p/0DdegAfe2OUguugD83OiLdrUvkcHl4XghLfAIGHmu4ODWzdRDDdAftVm9GL8FQze2NBnED9Qr/sqn64SBTa6iL5lRI4gh5A3TjR+q4vYGj1V9JPKw6I6bK+64uUQeFtUqD6ECncyoCPifovkVIhj1WsEQh8kDAVAQACh5ratchmw0aEwQiLMiqq+jhiObY4m7OZq4XMNRcvBJjhqHxHGhGGj7kfADZzK7LNfhoAQL3HhoBz4Yx6hoDNLz7JJc90M51ZaAoq07lEE5U7Br5GIZACiPBa9ol9y7Vgwb3DVl7SMfJSGjyXpfY4pMYPcLollo7E9m9ftkTldAIOuc8KxLYgAGVtnAhfLuaKWjAQBkvyAvTPs+gy43JGQCPxJ2fO3XTpTb5u+E3DfrZC6UT/xQzviBdWo73V+0dN/0q4LlxgAAAABJRU5ErkJggg==" />
+</head>
+
+<body>
+  <div class="bg-blob bg-blob-1" aria-hidden="true"></div>
+  <div class="bg-blob bg-blob-2" aria-hidden="true"></div>
+  <div class="global-container">
+    <header class="app-header">
+      <div class="logo-wrapper">
+        <img src="assets/img/logo.svg" alt="KeyStamina Logo" class="app-logo" />
+        <h1 class="app-title">
+          KeyStamina <span class="app-version">v1.0</span>
+        </h1>
+      </div>
+    </header>
+
+    <main class="workspace-container">
+      <div class="left-column">
+        <section class="section-card section-hash-selector" aria-labelledby="hash-selector-title">
+          <div class="aligned-settings-row">
+            <div class="label-with-tooltip">
+              <span id="hash-selector-title" class="section-title-label clickable-title">Target Hash:</span>
+              <div class="tooltip-container">
+                <button class="tooltip-trigger" aria-label="Target hash info" type="button">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="tooltip-icon">
+                    <circle cx="12" cy="12" r="10" stroke-width="1.6" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke-width="2.8" />
+                    <circle cx="12" cy="17" r="1.4" fill="currentColor" stroke="none" />
+                  </svg>
+                </button>
+                <div class="tooltip-content" role="tooltip">
+                  <strong>Algorithm Threat Models:</strong><br />
+                  • <strong>MD5 / NTLM (Broken):</strong> Cryptographically obsolete. Provides zero operational security
+                  against any modern hardware.<br />
+                  • <strong>SHA-256 (Unsafe):</strong> Engineered for maximum computational speed. Allows attackers to
+                  execute billions of offline guesses per second.<br />
+                  • <strong>PBKDF2 (Legacy):</strong> Utilizes processing loops with zero memory constraints. Trivial to
+                  bypass using parallel ASIC mining arrays.<br />
+                  • <strong>bcrypt (Adequate):</strong> Imposes strict CPU processing delays. Effectively neutralizes
+                  high-speed GPU brute-force attacks.<br />
+                  • <strong>Argon2id (Optimal):</strong> Requires massive memory allocation. Renders specialized
+                  cracking hardware economically impossible to scale.<br />
                 </div>
               </div>
-              <div class="select-wrapper size-hash-select">
-                <select
-                  id="hash-algorithm"
-                  class="custom-select"
-                  aria-label="Target Hash Algorithm"
-                >
-                  <option value="md5">MD5 / NTLM (Insecure)</option>
-                  <option value="sha256">SHA-256 (Fast Hash)</option>
-                  <option value="pbkdf2">PBKDF2 (Iterated)</option>
-                  <option value="bcrypt">bcrypt (CPU-Hard)</option>
-                  <option value="argon2id" selected>Argon2id (Memory-Hard)</option>
-                </select>
-              </div>
             </div>
-          </section>
+            <div class="select-wrapper size-hash-select">
+              <select id="hash-algorithm" class="custom-select" aria-label="Target Hash Algorithm">
+                <option value="md5">MD5 / NTLM (Broken)</option>
+                <option value="sha256">SHA-256 (Unsafe)</option>
+                <option value="pbkdf2">PBKDF2 (Legacy)</option>
+                <option value="bcrypt">bcrypt (Adequate)</option>
+                <option value="argon2id" selected>Argon2id (Optimal)</option>
+              </select>
+            </div>
+          </div>
+        </section>
 
-          <section
-            class="section-card passphrase-card"
-            aria-labelledby="passphrase-section-title"
-          >
+        <section class="section-card passphrase-card" aria-labelledby="passphrase-section-title">
           <h2 id="passphrase-section-title" class="sr-only">
             Passphrase Input and Generator
           </h2>
 
           <div class="passphrase-border-box">
             <div class="textarea-relative">
-              <textarea
-                id="passphrase-input"
-                class="passphrase-textarea"
-                placeholder=" "
-                maxlength="128"
-                rows="1"
-                autocomplete="off"
-                autocorrect="off"
-                autocapitalize="off"
-                spellcheck="false"
-                aria-label="Passphrase input"
-              ></textarea>
+              <textarea id="passphrase-input" class="passphrase-textarea" placeholder=" " maxlength="128" rows="1"
+                autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                aria-label="Passphrase input"></textarea>
               <label for="passphrase-input" class="floating-label">
-                <span class="label-prefix">Type </span
-                ><span class="label-core">Passphrase</span
-                ><span
-                  id="char-counter"
-                  class="char-counter-badge"
-                  aria-live="polite"
-                ></span>
+                <span class="label-prefix">Type </span><span class="label-core">Passphrase</span><span id="char-counter"
+                  class="char-counter-badge" aria-live="polite"></span>
               </label>
-              <button
-                id="clear-input-btn"
-                class="clear-btn"
-                aria-label="Clear passphrase"
-                type="button"
-                hidden
-              >
+              <button id="clear-input-btn" class="clear-btn" aria-label="Clear passphrase" type="button" hidden>
                 &times;
               </button>
             </div>
@@ -157,29 +96,16 @@
             <div class="box-divider"></div>
 
             <div class="box-actions-bar">
-              <button
-                id="copy-btn"
-                class="box-action-btn copy-btn-symmetric"
-                type="button"
-                disabled
-              >
+              <button id="copy-btn" class="box-action-btn copy-btn-symmetric" type="button" disabled>
                 Copy
               </button>
               <div class="actions-divider"></div>
-              <button
-                id="generate-btn"
-                class="box-action-btn generate-btn-symmetric"
-                type="button"
-              >
+              <button id="generate-btn" class="box-action-btn generate-btn-symmetric" type="button">
                 Generate
               </button>
               <div class="actions-divider"></div>
-              <button
-                id="toggle-advanced-btn"
-                class="box-action-btn toggle-advanced-btn"
-                type="button"
-                aria-label="Toggle advanced options"
-              >
+              <button id="toggle-advanced-btn" class="box-action-btn toggle-advanced-btn" type="button"
+                aria-label="Toggle advanced options">
                 +
               </button>
             </div>
@@ -190,38 +116,14 @@
               <div class="advanced-grid">
                 <div class="aligned-settings-row">
                   <div class="label-with-tooltip">
-                    <span class="input-field-label clickable-title"
-                      >Generation Format:</span
-                    >
+                    <span class="input-field-label clickable-title">Generation Format:</span>
                     <div class="tooltip-container">
-                      <button
-                        class="tooltip-trigger"
-                        aria-label="Format info"
-                        type="button"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="15"
-                          height="15"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          class="tooltip-icon"
-                        >
+                      <button class="tooltip-trigger" aria-label="Format info" type="button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="tooltip-icon">
                           <circle cx="12" cy="12" r="10" stroke-width="1.6" />
-                          <path
-                            d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
-                            stroke-width="2.8"
-                          />
-                          <circle
-                            cx="12"
-                            cy="17"
-                            r="1.4"
-                            fill="currentColor"
-                            stroke="none"
-                          />
+                          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke-width="2.8" />
+                          <circle cx="12" cy="17" r="1.4" fill="currentColor" stroke="none" />
                         </svg>
                       </button>
                       <div class="tooltip-content" role="tooltip">
@@ -230,13 +132,11 @@
                         • Customize character pool via checkboxes:<br />
                         A-Z (uppercase), a-z (lowercase), 0-9 (digits), and
                         Symbols.<br />
-                        • Ambiguous includes visually similar characters (<span
-                          style="font-family: monospace"
-                          >0, O, o, I, l, 1, i, L, |, 8, B, 9, g, q, 5, S, s, 2,
-                          Z, z</span
-                        >).<br /><br />
-                        <strong>Diceware Phrases:</strong> Generates a sequence
-                        of random words from a secure list.<br />
+                        • Ambiguous includes visually similar characters
+                        (<span style="font-family: monospace">0, O, o, I, l, 1, i, L, |, 8, B, 9, g, q, 5, S, s,
+                          2, Z, z</span>).<br /><br />
+                        <strong>Diceware Phrases:</strong> Generates a
+                        sequence of random words from a secure list.<br />
                         • Separator character (default is space) is used to
                         separate words.
                       </div>
@@ -251,10 +151,7 @@
                   </div>
                 </div>
 
-                <div
-                  id="dynamic-format-options"
-                  class="dynamic-options-container"
-                >
+                <div id="dynamic-format-options" class="dynamic-options-container">
                   <div id="ascii-options" class="options-group">
                     <div class="checkbox-row">
                       <label class="custom-checkbox-label">
@@ -280,22 +177,11 @@
                     </div>
                   </div>
 
-                  <div
-                    id="diceware-options"
-                    class="options-group"
-                    style="display: none"
-                  >
+                  <div id="diceware-options" class="options-group" style="display: none">
                     <div class="aligned-settings-row">
-                      <span class="input-field-label clickable-title"
-                        >Separator Character:</span
-                      >
-                      <input
-                        type="text"
-                        id="diceware-separator"
-                        class="custom-text-input size-separator-input"
-                        value=" "
-                        maxlength="1"
-                      />
+                      <span class="input-field-label clickable-title">Separator Character:</span>
+                      <input type="text" id="diceware-separator" class="custom-text-input size-separator-input"
+                        value=" " maxlength="1" />
                     </div>
                   </div>
                 </div>
@@ -303,44 +189,20 @@
                 <div class="advanced-crack-group">
                   <div class="aligned-settings-row margin-bottom-sm">
                     <div class="label-with-tooltip">
-                      <span class="input-field-label clickable-title"
-                        >Generation Target Resistance Time:</span
-                      >
+                      <span class="input-field-label clickable-title">Generation Target Resistance Time:</span>
                       <div class="tooltip-container">
-                        <button
-                          class="tooltip-trigger"
-                          aria-label="Target crack resistance info"
-                          type="button"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="15"
-                            height="15"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="tooltip-icon"
-                          >
+                        <button class="tooltip-trigger" aria-label="Target crack resistance info" type="button">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="tooltip-icon">
                             <circle cx="12" cy="12" r="10" stroke-width="1.6" />
-                            <path
-                              d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
-                              stroke-width="2.8"
-                            />
-                            <circle
-                              cx="12"
-                              cy="17"
-                              r="1.4"
-                              fill="currentColor"
-                              stroke="none"
-                            />
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke-width="2.8" />
+                            <circle cx="12" cy="17" r="1.4" fill="currentColor" stroke="none" />
                           </svg>
                         </button>
                         <div class="tooltip-content" role="tooltip">
                           Generates a passphrase mathematically guaranteed to
-                          withstand brute-force search by the selected class of
-                          cracking hardware for the specified duration.
+                          withstand brute-force search by the selected class
+                          of cracking hardware for the specified duration.
                         </div>
                       </div>
                     </div>
@@ -348,11 +210,7 @@
 
                   <div class="crack-time-inputs">
                     <div class="select-wrapper">
-                      <select
-                        id="target-hardware"
-                        class="custom-select"
-                        aria-label="Target hardware model"
-                      >
+                      <select id="target-hardware" class="custom-select" aria-label="Target hardware model">
                         <option value="laptop">Average Laptop</option>
                         <option value="pc">High-end PC</option>
                         <option value="server">Enterprise Server</option>
@@ -361,20 +219,10 @@
                         </option>
                       </select>
                     </div>
-                    <input
-                      id="target-time-value"
-                      class="custom-num-input"
-                      type="text"
-                      inputmode="numeric"
-                      value="1"
-                      aria-label="Target crack time value"
-                    />
+                    <input id="target-time-value" class="custom-num-input" type="text" inputmode="numeric" value="1"
+                      aria-label="Target crack time value" />
                     <div class="select-wrapper">
-                      <select
-                        id="target-time-unit"
-                        class="custom-select"
-                        aria-label="Target crack time unit"
-                      >
+                      <select id="target-time-unit" class="custom-select" aria-label="Target crack time unit">
                         <option value="seconds">Seconds</option>
                         <option value="minutes">Minutes</option>
                         <option value="hours">Hours</option>
@@ -390,47 +238,19 @@
           </div>
         </section>
 
-        <section
-          class="section-card resistance-card"
-          aria-labelledby="resistance-section-title"
-        >
+        <section class="section-card resistance-card" aria-labelledby="resistance-section-title">
           <div class="section-header-badge">
             <div class="title-with-tooltip">
-              <h2
-                id="resistance-section-title"
-                class="card-title clickable-title"
-              >
+              <h2 id="resistance-section-title" class="card-title clickable-title">
                 Brute-Force Resistance
               </h2>
               <div class="tooltip-container">
-                <button
-                  class="tooltip-trigger"
-                  aria-label="Brute force resistance info"
-                  type="button"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="tooltip-icon"
-                  >
+                <button class="tooltip-trigger" aria-label="Brute force resistance info" type="button">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="tooltip-icon">
                     <circle cx="12" cy="12" r="10" stroke-width="1.6" />
-                    <path
-                      d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
-                      stroke-width="2.8"
-                    />
-                    <circle
-                      cx="12"
-                      cy="17"
-                      r="1.4"
-                      fill="currentColor"
-                      stroke="none"
-                    />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke-width="2.8" />
+                    <circle cx="12" cy="17" r="1.4" fill="currentColor" stroke="none" />
                   </svg>
                 </button>
                 <div class="tooltip-content" role="tooltip">
@@ -440,9 +260,7 @@
                 </div>
               </div>
             </div>
-            <span id="resistance-badge" class="status-badge badge-low"
-              >Low</span
-            >
+            <span id="resistance-badge" class="status-badge badge-low">Low</span>
           </div>
 
           <div class="resistance-grid">
@@ -451,40 +269,32 @@
                 <span class="hardware-name">Average Laptop</span>
                 <span class="connector-line"></span>
               </div>
-              <span class="crack-time-display" id="time-laptop"
-                ><span class="time-value"> 0</span
-                ><span class="time-unit">Seconds</span></span
-              >
+              <span class="crack-time-display" id="time-laptop"><span class="time-value"> 0</span><span
+                  class="time-unit">Seconds</span></span>
             </div>
             <div class="resistance-row" id="row-pc">
               <div class="hardware-name-group">
                 <span class="hardware-name">High-end PC</span>
                 <span class="connector-line"></span>
               </div>
-              <span class="crack-time-display" id="time-pc"
-                ><span class="time-value"> 0</span
-                ><span class="time-unit">Seconds</span></span
-              >
+              <span class="crack-time-display" id="time-pc"><span class="time-value"> 0</span><span
+                  class="time-unit">Seconds</span></span>
             </div>
             <div class="resistance-row" id="row-server">
               <div class="hardware-name-group">
                 <span class="hardware-name">Enterprise Server</span>
                 <span class="connector-line"></span>
               </div>
-              <span class="crack-time-display" id="time-server"
-                ><span class="time-value"> 0</span
-                ><span class="time-unit">Seconds</span></span
-              >
+              <span class="crack-time-display" id="time-server"><span class="time-value"> 0</span><span
+                  class="time-unit">Seconds</span></span>
             </div>
             <div class="resistance-row" id="row-supercomputer">
               <div class="hardware-name-group">
                 <span class="hardware-name">Supercomputer</span>
                 <span class="connector-line"></span>
               </div>
-              <span class="crack-time-display" id="time-supercomputer"
-                ><span class="time-value"> 0</span
-                ><span class="time-unit">Seconds</span></span
-              >
+              <span class="crack-time-display" id="time-supercomputer"><span class="time-value"> 0</span><span
+                  class="time-unit">Seconds</span></span>
             </div>
           </div>
         </section>
@@ -494,47 +304,24 @@
         <section class="section-card terminal-card" aria-label="Telemetry Terminal">
           <div class="terminal-header">
             <div class="title-with-tooltip">
-              <h2 class="card-title clickable-title">Cryptographic Telemetry</h2>
+              <h2 class="card-title clickable-title">CRYPTOGRAPHIC CONSOLE</h2>
               <div class="tooltip-container">
-                <button
-                  class="tooltip-trigger"
-                  aria-label="Telemetry info"
-                  type="button"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="tooltip-icon"
-                  >
+                <button class="tooltip-trigger" aria-label="Telemetry info" type="button">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="tooltip-icon">
                     <circle cx="12" cy="12" r="10" stroke-width="1.6" />
-                    <path
-                      d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
-                      stroke-width="2.8"
-                    />
-                    <circle
-                      cx="12"
-                      cy="17"
-                      r="1.4"
-                      fill="currentColor"
-                      stroke="none"
-                    />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke-width="2.8" />
+                    <circle cx="12" cy="17" r="1.4" fill="currentColor" stroke="none" />
                   </svg>
                 </button>
                 <div class="tooltip-content" role="tooltip">
-                  Real-time cryptographic diagnostics including hash value calculation, keyspace equation proofs, pattern identification and dictionary checks.
+                  Real-time cryptographic diagnostics including hash value calculation, keyspace equation proofs,
+                  pattern identification and dictionary checks.
                 </div>
               </div>
             </div>
-            <div class="terminal-status-wrapper">
-              <span class="terminal-status-dot"></span>
-              <span class="terminal-status">OFFLINE</span>
-            </div>
+            <button id="terminal-copy-btn" class="terminal-copy-btn" type="button" aria-label="Copy terminal logs"
+              disabled>Copy</button>
           </div>
           <div class="terminal-body" id="telemetry-output" tabindex="-1">
             <div class="terminal-line log-system">[SYS] Initializing entropy telemetry sandbox...</div>
@@ -544,35 +331,25 @@
             <div class="terminal-line log-info">Ready. Enter passphrase to stream telemetry.</div>
             <div class="terminal-line log-system">[MONITOR] Awaiting entropy stream...</div>
           </div>
-        </section>
       </div>
-    </main>
+      </section>
+  </div>
+  </main>
 
-      <footer class="app-footer">
-        <a
-          href="https://github.com/reza-shabankhah/key-stamina"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="github-link"
-          id="github-link"
-        >
-          <svg
-            class="github-icon"
-            viewBox="0 0 16 16"
-            width="16"
-            height="16"
-            aria-hidden="true"
-            fill="currentColor"
-          >
-            <path
-              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
-            ></path>
-          </svg>
-          <span>View Source on GitHub</span>
-        </a>
-      </footer>
-    </div>
+  <footer class="app-footer">
+    <a href="https://github.com/reza-shabankhah/key-stamina" target="_blank" rel="noopener noreferrer"
+      class="github-link" id="github-link">
+      <svg class="github-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="currentColor">
+        <path
+          d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+        </path>
+      </svg>
+      <span>View Source on GitHub</span>
+    </a>
+  </footer>
+  </div>
 
-    <script type="module" src="./ts/app.ts"></script>
-  </body>
+  <script type="module" src="./ts/app.ts"></script>
+</body>
+
 </html>

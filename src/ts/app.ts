@@ -24,6 +24,7 @@ initHashSelector();
 initGenerateButton();
 initAdvancedPanelToggle();
 initDynamicFormatOptionsInteractivity();
+initTerminalCopyBtn();
 
 // Tier → DOM element id; module-level to avoid per-call recreation.
 const TIER_EL_MAP: [HardwareTier, string][] = [
@@ -47,6 +48,9 @@ function initPassphraseInput(): void {
   const clearBtn = document.getElementById("clear-input-btn");
   const copyBtn = document.getElementById(
     "copy-btn",
+  ) as HTMLButtonElement | null;
+  const termCopyBtn = document.getElementById(
+    "terminal-copy-btn",
   ) as HTMLButtonElement | null;
 
   if (!textarea) return;
@@ -80,6 +84,7 @@ function initPassphraseInput(): void {
 
     const invalidChar = textarea.value.match(/[^\x20-\x7E]/)?.[0];
 
+    // Reset Passphrase Copy Button
     if (copyBtn) {
       if (invalidChar) {
         copyBtn.disabled = false;
@@ -90,6 +95,12 @@ function initPassphraseInput(): void {
         copyBtn.textContent = "Copy";
         copyBtn.classList.remove("btn-unsupported");
       }
+    }
+
+    // Reset Terminal Copy Button
+    if (termCopyBtn) {
+      termCopyBtn.disabled = !hasContent || !!invalidChar;
+      termCopyBtn.textContent = "Copy";
     }
 
     if (hasContent && !invalidChar) {
@@ -119,34 +130,7 @@ function initPassphraseInput(): void {
     copyBtn.addEventListener("click", () => {
       if (copyBtn.classList.contains("btn-unsupported") || !textarea.value)
         return;
-
-      const onSuccess = () => {
-        copyBtn.textContent = "Copied!";
-        copyBtn.disabled = true;
-      };
-
-      const fallbackCopy = () => {
-        const el = document.createElement("textarea");
-        el.value = textarea.value;
-        el.style.cssText = "position:fixed;left:-9999px;top:0";
-        document.body.appendChild(el);
-        el.focus();
-        el.select();
-        try {
-          document.execCommand("copy");
-        } catch {}
-        document.body.removeChild(el);
-        onSuccess();
-      };
-
-      if (navigator.clipboard?.writeText) {
-        navigator.clipboard
-          .writeText(textarea.value)
-          .then(onSuccess)
-          .catch(fallbackCopy);
-      } else {
-        fallbackCopy();
-      }
+      executeCopy(textarea.value, copyBtn);
     });
   }
 
@@ -160,6 +144,10 @@ function initPassphraseInput(): void {
         copyBtn.textContent = "Copy";
         copyBtn.disabled = true;
         copyBtn.classList.remove("btn-unsupported");
+      }
+      if (termCopyBtn) {
+        termCopyBtn.textContent = "Copy";
+        termCopyBtn.disabled = true;
       }
       resetCrackTimes();
       resetResistanceBadge();
@@ -204,11 +192,6 @@ function initBorderMaskHandling(): void {
 
   if (!textarea || !borderBox || !labelCore) return;
 
-  const visualLeftGap = 4.0;
-  const visualRightGap = 2.0;
-  const labelLeft = 15.2; // 0.95rem CSS match
-  const leftPadding = 2.4; // 0.2rem CSS padding scaled
-
   let maskRaf: number;
   const updateMask = () => {
     cancelAnimationFrame(maskRaf);
@@ -216,9 +199,10 @@ function initBorderMaskHandling(): void {
       const counterWidth = charCounter?.textContent
         ? charCounter.offsetWidth
         : 0;
-      const scaledTextWidth = (labelCore.offsetWidth + counterWidth) * 0.75;
-      const maskLeft = labelLeft + leftPadding - visualLeftGap;
-      const maskWidth = visualLeftGap + scaledTextWidth + visualRightGap;
+      const textWidth = labelCore.offsetWidth + counterWidth;
+      const unscaledLabelWidth = textWidth + 11.2;
+      const maskWidth = unscaledLabelWidth * 0.75;
+      const maskLeft = 6.4;
 
       borderBox.style.setProperty("--mask-width", `${maskWidth}px`);
       borderBox.style.setProperty("--mask-left", `${maskLeft}px`);
@@ -245,49 +229,19 @@ function initMobileAutoScroll(): void {
   const checkMobile = () => {
     isMobile = window.innerWidth <= 768;
   };
+
   window.addEventListener("resize", checkMobile);
   checkMobile();
 
   textarea.addEventListener("focus", () => {
     if (!isMobile) return;
-    setTimeout(
-      () => card.scrollIntoView({ behavior: "smooth", block: "start" }),
-      300,
-    );
+
+    // Allows native keyboard expansion to calculate before pushing the scroll
+    setTimeout(() => {
+      card.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 300);
   });
 
-  let blurScrollY = 0;
-  let preventScrollRestore = false;
-  let restoreTimeout: number | undefined;
-
-  const endScrollLock = () => {
-    preventScrollRestore = false;
-    if (restoreTimeout !== undefined) {
-      clearTimeout(restoreTimeout);
-      restoreTimeout = undefined;
-    }
-  };
-
-  const handleViewportResize = () => {
-    if (!preventScrollRestore || !isMobile) return;
-    window.scrollTo(0, blurScrollY);
-    const vp = window.visualViewport;
-    if (vp && Math.abs(vp.height - window.innerHeight) < 15) endScrollLock();
-  };
-
-  window.visualViewport?.addEventListener("resize", handleViewportResize);
-
-  textarea.addEventListener("blur", () => {
-    if (!isMobile) return;
-    blurScrollY = window.scrollY || document.documentElement.scrollTop;
-    preventScrollRestore = true;
-    clearTimeout(restoreTimeout);
-    restoreTimeout = window.setTimeout(endScrollLock, 600);
-  });
-
-  window.addEventListener("scroll", () => {
-    if (preventScrollRestore && isMobile) window.scrollTo(0, blurScrollY);
-  });
 }
 
 function initTooltips(): void {
@@ -366,6 +320,16 @@ function initHashSelector(): void {
     if (!textarea.value.length) return;
     const currentJobId = ++latestInputJobId;
     const algo = hashSelect.value as Algorithm;
+
+    // Reset Terminal Copy Button when hash changes
+    const termCopyBtn = document.getElementById(
+      "terminal-copy-btn",
+    ) as HTMLButtonElement | null;
+    if (termCopyBtn) {
+      termCopyBtn.textContent = "Copy";
+      termCopyBtn.disabled = false;
+    }
+
     evaluatePassword(textarea.value, algo).then((result) => {
       if (!result || currentJobId !== latestInputJobId) return;
       updateCrackTimes(result.guesses);
@@ -689,4 +653,45 @@ function resetTerminalTelemetry(): void {
     <div class="terminal-line log-info">Ready. Enter passphrase to stream telemetry.</div>
     <div class="terminal-line log-system">[MONITOR] Awaiting entropy stream...</div>
   `;
+}
+
+function executeCopy(text: string, btn: HTMLButtonElement): void {
+  const onSuccess = () => {
+    btn.textContent = "Copied!";
+    btn.disabled = true;
+  };
+
+  const fallbackCopy = () => {
+    const el = document.createElement("textarea");
+    el.value = text;
+    el.style.cssText = "position:fixed;left:-9999px;top:0";
+    document.body.appendChild(el);
+    el.focus();
+    el.select();
+    try {
+      document.execCommand("copy");
+    } catch {}
+    document.body.removeChild(el);
+    onSuccess();
+  };
+
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(onSuccess).catch(fallbackCopy);
+  } else {
+    fallbackCopy();
+  }
+}
+
+function initTerminalCopyBtn(): void {
+  const btn = document.getElementById(
+    "terminal-copy-btn",
+  ) as HTMLButtonElement | null;
+  const output = document.getElementById("telemetry-output");
+
+  if (!btn || !output) return;
+
+  btn.addEventListener("click", () => {
+    if (btn.disabled) return;
+    executeCopy(output.innerText, btn);
+  });
 }
