@@ -57,9 +57,23 @@ async function hashPassword(password: string, algo: string): Promise<string> {
   }
 }
 
+let latestJobId = 0;
+
 self.onmessage = async (e: MessageEvent) => {
-  const { jobId, password, algo } = e.data;
+  const { jobId, password, algo, skipHash } = e.data;
+  latestJobId = Math.max(latestJobId, jobId);
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  if (jobId !== latestJobId) return;
+
   const result = zxcvbn.check(password);
-  const hashValue = await hashPassword(password, algo);
+  if (jobId !== latestJobId) return;
+
+  let hashValue = "";
+  if (!skipHash) {
+    hashValue = await hashPassword(password, algo);
+  }
+  
+  if (jobId !== latestJobId) return;
   self.postMessage({ jobId, result, hashValue });
 };

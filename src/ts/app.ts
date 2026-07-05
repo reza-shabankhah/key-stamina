@@ -185,17 +185,36 @@ class ConsoleManager {
         lines.push(`<div class="console-line">[VULNERABILITIES]</div>`);
 
         let foundVuln = false;
+        let inCommonPasswords = false;
         result.sequence.forEach((match: any) => {
           if (match.pattern !== "bruteforce") {
             foundVuln = true;
-            lines.push(
-              `<div class="console-line">"${match.token}" is in [${match.pattern}]</div>`,
-            );
+            
+            let desc = "";
+            if (match.pattern === "dictionary") {
+              const dictionary = match.dictionaryName ?? "unknown";
+              if (dictionary === "passwords") inCommonPasswords = true;
+              
+              if (match.l33t) {
+                desc = `"${match.token}" is in [${dictionary} l33t]`;
+              } else {
+                desc = `"${match.token}" is in [${dictionary}]`;
+              }
+            } else {
+              desc = `"${match.token}" is in [${match.pattern}]`;
+            }
+
+            lines.push(`<div class="console-line">${desc}</div>`);
           }
         });
         if (!foundVuln) {
           lines.push(
             `<div class="console-line">None detected. (Pure bruteforce)</div>`,
+          );
+        } else if (inCommonPasswords) {
+          lines.push(`<div class="console-line"><br/></div>`);
+          lines.push(
+            `<div class="console-line">Danger: Base password found in top-passwords lists</div>`
           );
         }
       }
@@ -581,12 +600,16 @@ function initHashSelector(): void {
 
   hashSelect.addEventListener("change", () => {
     if (!textarea.value.length) return;
+    clearTimeout(evaluateTimeout);
     const currentJobId = ++latestInputJobId;
     const algo = hashSelect.value as Algorithm;
+
+    ConsoleManager.getInstance().setState("processing_manual");
 
     evaluatePassword(textarea.value, algo).then((result) => {
       if (!result || currentJobId !== latestInputJobId) return;
       updateCrackTimes(result.guesses);
+      updateCrackTimeBadge(result.guesses, algo);
       ConsoleManager.getInstance().setState("completed_manual", {
         password: textarea.value,
         result,
@@ -767,7 +790,7 @@ function initGenerateButton(): void {
       let currentResult: any = null;
 
       if (format === "ascii") {
-        currentResult = await evaluatePassword(candidate, algo);
+        currentResult = await evaluatePassword(candidate, algo, true);
         if (!currentResult) break;
 
         if (currentResult.sequence) {
@@ -788,7 +811,7 @@ function initGenerateButton(): void {
               new Set(
                 currentResult.sequence
                   .filter((m: any) => m.pattern !== "bruteforce")
-                  .map((m: any) => m.pattern),
+                  .map((m: any) => m.pattern === "dictionary" ? `${m.dictionaryName || 'unknown'} dictionary` : m.pattern),
               ),
             );
             ConsoleManager.getInstance().setState("processing_generation", {
@@ -812,7 +835,7 @@ function initGenerateButton(): void {
 
       if (!hasVulnerability) {
         finalPassphrase = candidate;
-        finalResult = currentResult;
+        finalResult = await evaluatePassword(candidate, algo, false);
         break;
       }
 
@@ -824,10 +847,6 @@ function initGenerateButton(): void {
       finalResult = await evaluatePassword(candidate, algo);
     }
 
-    if (format !== "ascii") {
-      finalPassphrase = candidate;
-      finalResult = await evaluatePassword(candidate, algo);
-    }
 
     generateBtn.innerHTML = originalBtnText;
     generateBtn.disabled = false;

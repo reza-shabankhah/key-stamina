@@ -98,6 +98,7 @@ worker.onmessage = (e: MessageEvent) => {
 export function evaluatePassword(
   password: string,
   algo: Algorithm,
+  skipHash = false
 ): Promise<ZxcvbnResult | null> {
   return new Promise((resolve) => {
     pendingJobs.forEach((resolveStale) => resolveStale(null));
@@ -105,7 +106,7 @@ export function evaluatePassword(
 
     const jobId = ++currentJobId;
     pendingJobs.set(jobId, resolve);
-    worker.postMessage({ jobId, password, algo });
+    worker.postMessage({ jobId, password, algo, skipHash });
   });
 }
 
@@ -194,21 +195,55 @@ export function buildAsciiPool(config: AsciiConfig): string {
 }
 
 export function generateAscii(length: number, pool: string): string {
-  const array = new Uint32Array(length);
-  crypto.getRandomValues(array);
+  const maxSafe = Math.floor(4294967296 / pool.length) * pool.length;
   let result = "";
+  let buf = new Uint32Array(length);
+  crypto.getRandomValues(buf);
+  let bufIdx = 0;
+
   for (let i = 0; i < length; i++) {
-    result += pool[array[i] % pool.length];
+    if (bufIdx >= buf.length) {
+      buf = new Uint32Array(length);
+      crypto.getRandomValues(buf);
+      bufIdx = 0;
+    }
+    let rand = buf[bufIdx++];
+    while (rand >= maxSafe) {
+      if (bufIdx >= buf.length) {
+        buf = new Uint32Array(length);
+        crypto.getRandomValues(buf);
+        bufIdx = 0;
+      }
+      rand = buf[bufIdx++];
+    }
+    result += pool[rand % pool.length];
   }
   return result;
 }
 
 export function generateDiceware(length: number, separator: string): string {
-  const array = new Uint32Array(length);
-  crypto.getRandomValues(array);
+  const maxSafe = Math.floor(4294967296 / dicewareList.length) * dicewareList.length;
   const words: string[] = [];
+  let buf = new Uint32Array(length);
+  crypto.getRandomValues(buf);
+  let bufIdx = 0;
+
   for (let i = 0; i < length; i++) {
-    words.push(dicewareList[array[i] % dicewareList.length]);
+    if (bufIdx >= buf.length) {
+      buf = new Uint32Array(length);
+      crypto.getRandomValues(buf);
+      bufIdx = 0;
+    }
+    let rand = buf[bufIdx++];
+    while (rand >= maxSafe) {
+      if (bufIdx >= buf.length) {
+        buf = new Uint32Array(length);
+        crypto.getRandomValues(buf);
+        bufIdx = 0;
+      }
+      rand = buf[bufIdx++];
+    }
+    words.push(dicewareList[rand % dicewareList.length]);
   }
   return words.join(separator);
 }
