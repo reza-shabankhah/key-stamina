@@ -48,17 +48,17 @@
                   </svg>
                 </button>
                 <div class="tooltip-content" role="tooltip">
-                  <strong>Algorithm Threat Models:</strong><br />
-                  • <strong>MD5 / NTLM (Broken):</strong> Cryptographically obsolete. Provides zero operational security
-                  against any modern hardware.<br />
-                  • <strong>SHA-256 (Unsafe):</strong> Engineered for maximum computational speed. Allows attackers to
-                  execute billions of offline guesses per second.<br />
-                  • <strong>PBKDF2 (Legacy):</strong> Utilizes processing loops with zero memory constraints. Trivial to
-                  bypass using parallel ASIC mining arrays.<br />
-                  • <strong>bcrypt (Adequate):</strong> Imposes strict CPU processing delays. Effectively neutralizes
-                  high-speed GPU brute-force attacks.<br />
-                  • <strong>Argon2id (Optimal):</strong> Requires massive memory allocation. Renders specialized
-                  cracking hardware economically impossible to scale.<br />
+                  <strong>Algorithm Threat Models:</strong><br /><br />
+                  • <span style="color: var(--color-low);"><strong>MD5 / NTLM:</strong></span> Cryptographically broken.
+                  Provides zero security against modern hardware.<br />
+                  • <span style="color: var(--color-low);"><strong>SHA-256:</strong></span> Built for speed, not
+                  security. Highly vulnerable to parallel GPU attacks.<br />
+                  • <span style="color: var(--color-medium);"><strong>PBKDF2:</strong></span> High CPU iterations, but
+                  easily bypassed by custom ASIC mining arrays.<br />
+                  • <span style="color: var(--color-high);"><strong>bcrypt:</strong></span> CPU-hardened logic
+                  effectively neutralizes high-speed GPU clustering.<br />
+                  • <span style="color: var(--accent-neon);"><strong>Argon2id (Optimal):</strong></span> Requires
+                  massive memory allocation. The modern standard for defeating dedicated cracking hardware.
                 </div>
               </div>
             </div>
@@ -127,18 +127,16 @@
                         </svg>
                       </button>
                       <div class="tooltip-content" role="tooltip">
-                        <strong>ASCII:</strong> Generates a random character
-                        string.<br />
-                        • Customize character pool via checkboxes:<br />
-                        A-Z (uppercase), a-z (lowercase), 0-9 (digits), and
-                        Symbols.<br />
-                        • Ambiguous includes visually similar characters
-                        (<span style="font-family: monospace">0, O, o, I, l, 1, i, L, |, 8, B, 9, g, q, 5, S, s,
-                          2, Z, z</span>).<br /><br />
-                        <strong>Diceware Phrases:</strong> Generates a
-                        sequence of random words from a secure list.<br />
-                        • Separator character (default is space) is used to
-                        separate words.
+                        <strong>ASCII Generator:</strong><br />
+                        Creates a highly entropic string of random characters.<br />
+                        <em style="color: var(--text-muted);"><strong>Pro Tip:</strong> Deselect "Ambiguous" to remove
+                        visually confusing characters like <span
+                          style="font-family: monospace; color: var(--text-main);">0, O, l, 1, I</span>.</em><br /><br />
+
+                        <strong>Diceware Generator:</strong><br />
+                        Creates a long, memorable sequence of random dictionary words.<br />
+                        <em style="color: var(--text-muted);"><strong>Pro Tip:</strong> Diceware is mathematically
+                        stronger and easier for humans to memorize than complex ASCII strings.</em>
                       </div>
                     </div>
                   </div>
@@ -189,9 +187,9 @@
                 <div class="advanced-crack-group">
                   <div class="aligned-settings-row margin-bottom-sm">
                     <div class="label-with-tooltip">
-                      <span class="input-field-label clickable-title">Generation Target Resistance Time:</span>
+                      <span class="input-field-label clickable-title">Minimum Crack Time:</span>
                       <div class="tooltip-container">
-                        <button class="tooltip-trigger" aria-label="Target crack resistance info" type="button">
+                        <button class="tooltip-trigger" aria-label="Minimum crack time info" type="button">
                           <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="tooltip-icon">
                             <circle cx="12" cy="12" r="10" stroke-width="1.6" />
@@ -200,9 +198,10 @@
                           </svg>
                         </button>
                         <div class="tooltip-content" role="tooltip">
-                          Generates a passphrase mathematically guaranteed to
-                          withstand brute-force search by the selected class
-                          of cracking hardware for the specified duration.
+                          <strong>Mathematical Security Baseline:</strong><br />
+                          Generates a passphrase with enough mathematical entropy to guarantee it will survive an
+                          intelligent hybrid attack (dictionary + brute force) for <strong>at least</strong> the
+                          specified duration on the selected hardware tier.
                         </div>
                       </div>
                     </div>
@@ -219,10 +218,10 @@
                         </option>
                       </select>
                     </div>
-                    <input id="target-time-value" class="custom-num-input" type="text" inputmode="numeric" value="1"
-                      aria-label="Target crack time value" />
+                    <input id="minimum-time-value" class="custom-num-input" type="text" inputmode="numeric" value="1"
+                      aria-label="Minimum crack time value" />
                     <div class="select-wrapper">
-                      <select id="target-time-unit" class="custom-select" aria-label="Target crack time unit">
+                      <select id="minimum-time-unit" class="custom-select" aria-label="Minimum crack time unit">
                         <option value="seconds">Seconds</option>
                         <option value="minutes">Minutes</option>
                         <option value="hours">Hours</option>
@@ -238,14 +237,14 @@
           </div>
         </section>
 
-        <section class="section-card resistance-card" aria-labelledby="resistance-section-title">
+        <section class="section-card crack-time-card" aria-labelledby="crack-time-section-title">
           <div class="section-header-badge">
             <div class="title-with-tooltip">
-              <h2 id="resistance-section-title" class="card-title clickable-title">
-                Brute-Force Resistance
+              <h2 id="crack-time-section-title" class="card-title clickable-title">
+                Estimated Crack Time
               </h2>
               <div class="tooltip-container">
-                <button class="tooltip-trigger" aria-label="Brute force resistance info" type="button">
+                <button class="tooltip-trigger" aria-label="Crack time info" type="button">
                   <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="tooltip-icon">
                     <circle cx="12" cy="12" r="10" stroke-width="1.6" />
@@ -254,17 +253,22 @@
                   </svg>
                 </button>
                 <div class="tooltip-content" role="tooltip">
-                  Estimated time for an attacker to test all combinations of a
-                  password matching this strength pattern. Calculations assume
-                  standard hash rates scaled by hardware throughput.
+                  <strong>Keyspace Exhaustion Time:</strong><br />
+                  The estimated time required for specialized hardware to successfully guess the passphrase.<br /><br />
+                  <strong>Hardware Baselines (2026):</strong><br />
+                  - <strong>Laptop:</strong> Integrated iGPU<br />
+                  - <strong>High-end PC:</strong> 1x RTX 5090<br />
+                  - <strong>Enterprise Server:</strong> 8x RTX 5090 cluster<br />
+                  - <strong>Supercomputer:</strong> 1,000x RTX 5090 nodes<br /><br />
+                  <em style="color: var(--text-muted);">Note: Calculation intelligently accounts for targeted dictionary words and keyboard patterns before pure brute-force math.</em>
                 </div>
               </div>
             </div>
-            <span id="resistance-badge" class="status-badge badge-low">Low</span>
+            <span id="crack-time-badge" class="status-badge badge-low">Low</span>
           </div>
 
-          <div class="resistance-grid">
-            <div class="resistance-row" id="row-laptop">
+          <div class="crack-time-grid">
+            <div class="crack-time-row" id="row-laptop">
               <div class="hardware-name-group">
                 <span class="hardware-name">Average Laptop</span>
                 <span class="connector-line"></span>
@@ -272,7 +276,7 @@
               <span class="crack-time-display" id="time-laptop"><span class="time-value"> 0</span><span
                   class="time-unit">Seconds</span></span>
             </div>
-            <div class="resistance-row" id="row-pc">
+            <div class="crack-time-row" id="row-pc">
               <div class="hardware-name-group">
                 <span class="hardware-name">High-end PC</span>
                 <span class="connector-line"></span>
@@ -280,7 +284,7 @@
               <span class="crack-time-display" id="time-pc"><span class="time-value"> 0</span><span
                   class="time-unit">Seconds</span></span>
             </div>
-            <div class="resistance-row" id="row-server">
+            <div class="crack-time-row" id="row-server">
               <div class="hardware-name-group">
                 <span class="hardware-name">Enterprise Server</span>
                 <span class="connector-line"></span>
@@ -288,7 +292,7 @@
               <span class="crack-time-display" id="time-server"><span class="time-value"> 0</span><span
                   class="time-unit">Seconds</span></span>
             </div>
-            <div class="resistance-row" id="row-supercomputer">
+            <div class="crack-time-row" id="row-supercomputer">
               <div class="hardware-name-group">
                 <span class="hardware-name">Supercomputer</span>
                 <span class="connector-line"></span>
@@ -301,35 +305,19 @@
       </div>
 
       <div class="right-column">
-        <section class="section-card terminal-card" aria-label="Telemetry Terminal">
-          <div class="terminal-header">
-            <div class="title-with-tooltip">
-              <h2 class="card-title clickable-title">CRYPTOGRAPHIC CONSOLE</h2>
-              <div class="tooltip-container">
-                <button class="tooltip-trigger" aria-label="Telemetry info" type="button">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="tooltip-icon">
-                    <circle cx="12" cy="12" r="10" stroke-width="1.6" />
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke-width="2.8" />
-                    <circle cx="12" cy="17" r="1.4" fill="currentColor" stroke="none" />
-                  </svg>
-                </button>
-                <div class="tooltip-content" role="tooltip">
-                  Real-time cryptographic diagnostics including hash value calculation, keyspace equation proofs,
-                  pattern identification and dictionary checks.
-                </div>
-              </div>
-            </div>
-            <button id="terminal-copy-btn" class="terminal-copy-btn" type="button" aria-label="Copy terminal logs"
-              disabled>Copy</button>
+        <section class="section-card console-card" aria-label="Cryptography Telemetry Console">
+          <div class="console-header">
+            <h2 class="card-title">CRYPTOGRAPHY CONSOLE</h2>
           </div>
-          <div class="terminal-body" id="telemetry-output" tabindex="-1">
-            <div class="terminal-line log-system">[SYS] Initializing entropy telemetry sandbox...</div>
-            <div class="terminal-line log-system">[SYS] Hashing engine: hash-wasm (WASM loaded)</div>
-            <div class="terminal-line log-system">[SYS] Entropy estimator: @zxcvbn-ts (Offline dictionary loaded)</div>
-            <div class="terminal-line log-system">[SYS] CSP: Connect-src blocked. WebWorker thread: Spawned.</div>
-            <div class="terminal-line log-info">Ready. Enter passphrase to stream telemetry.</div>
-            <div class="terminal-line log-system">[MONITOR] Awaiting entropy stream...</div>
+          <div class="console-body" id="console-output" tabindex="-1">
+            <div class="console-line log-info">[SYSTEM READY]</div>
+            <div class="console-line log-info">Engines: zxcvbn-ts, hash-wasm</div>
+            <div class="console-line log-info">Active Language Packages:</div>
+            <div class="console-line log-info">- @zxcvbn-ts/language-common</div>
+            <div class="console-line log-info">- @zxcvbn-ts/language-en</div>
+            <div class="console-line log-info">- @zxcvbn-ts/language-fa</div>
+            <div class="console-line log-info">&nbsp;</div>
+            <div class="console-line log-info">Awaiting input stream...</div>
           </div>
       </div>
       </section>

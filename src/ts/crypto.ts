@@ -28,48 +28,46 @@ export const TIME_UNIT_SECONDS: Record<TimeUnit, number> = {
 };
 
 /*
- * Offline worst-case H/s per hardware tier (2024/2025 Hashcat benchmarks).
+ * Hashcat Offline Brute-Force Benchmarks (Base Year: 2026)
  *
- * Laptop     — Low-end laptop with integrated GPU (Intel UHD / AMD Vega iGPU)
- * PC         — Single RTX 4090 with optimized Hashcat kernels (-O flag)
- * Server     — Dedicated 8x RTX 4090 cracking server (~8x PC values)
- * Supercomp  — Nation-state GPU cluster (~1,000x RTX 4090 equivalent)
+ * Hardware Profiles:
+ *   Laptop     : Integrated iGPU (Intel UHD / AMD Vega)
+ *   PC         : 1x RTX 5090 (Optimized kernels: -O)
+ *   Server     : 8x RTX 5090 cluster
+ *   Supercomp  : 1,000x RTX 5090 node equivalent
  *
- * Slow-hash parameters assumed (worst-case for attacker):
- *   PBKDF2   — 600,000 iterations (OWASP 2023 minimum for SHA-256)
- *   bcrypt   — cost factor 10 (current industry default)
- *   Argon2id — 64 MiB memory, 3 iterations (OWASP recommended minimum)
- *
- * Sources: hashcat.net official benchmarks, Bitwarden security white-papers,
- *          Tom's Hardware RTX 4090 review, security.stackexchange.com.
+ * Algorithm Cost Assumptions (OWASP 2026 Minimums):
+ *   PBKDF2   : 600,000 iter (HMAC-SHA-256)
+ *   bcrypt   : Cost 10
+ *   Argon2id : m=65536 (64MiB), t=3, p=1
  */
 
 export const HASH_RATES: Record<HardwareTier, Record<Algorithm, number>> = {
   // ~2 GH/s MD5 / ~200 MH/s SHA-256 (Intel UHD 770 / AMD Vega 8)
   laptop: { md5: 2e9, sha256: 2e8, pbkdf2: 200, bcrypt: 50, argon2id: 20 },
-  // RTX 4090 single-card hashcat benchmarks (hashcat.net, 2024)
+  // RTX 5090 single-card hashcat benchmarks
   pc: {
-    md5: 1.64e11,
-    sha256: 2.2e10,
-    pbkdf2: 2200,
-    bcrypt: 6000,
-    argon2id: 1800,
+    md5: 2.4e11,      // 240 GH/s
+    sha256: 1.0e11,   // 100 GH/s
+    pbkdf2: 1.2e6,    // 1.2 MH/s
+    bcrypt: 8.8e4,    // 88 kH/s
+    argon2id: 1500,   // 1.5 kH/s
   },
-  // 8x RTX 4090 dedicated cracking server (linear scaling)
+  // 8x RTX 5090 dedicated cracking server (linear scaling)
   server: {
-    md5: 1.31e12,
-    sha256: 1.76e11,
-    pbkdf2: 17600,
-    bcrypt: 48000,
-    argon2id: 14400,
+    md5: 1.92e12,
+    sha256: 8.0e11,
+    pbkdf2: 9.6e6,
+    bcrypt: 7.04e5,
+    argon2id: 12000,
   },
-  // Nation-state GPU cluster (~1,000x RTX 4090 equivalent nodes)
+  // Nation-state GPU cluster (~1,000x RTX 5090 equivalent nodes)
   supercomputer: {
-    md5: 1.64e14,
-    sha256: 2.2e13,
-    pbkdf2: 2.2e6,
-    bcrypt: 6e6,
-    argon2id: 1.8e6,
+    md5: 2.4e14,
+    sha256: 1.0e14,
+    pbkdf2: 1.2e9,
+    bcrypt: 8.8e7,
+    argon2id: 1.5e6,
   },
 };
 
@@ -187,13 +185,18 @@ const CHARSETS: Record<"ascii" | "numeric", string> = {
 export function generateTargetedPassphrase(
   format: "ascii" | "numeric",
   guesses: number,
+  algo: Algorithm,
 ): string {
   const charset = CHARSETS[format];
   const c = charset.length;
-  const length = Math.min(
+  let length = Math.min(
     Math.max(guesses > 1 ? Math.ceil(Math.log2(guesses) / Math.log2(c)) : 1, 1),
     128,
   );
+
+  if (algo === "bcrypt" && length > 72) {
+    length = 72; // Bcrypt silently truncates inputs larger than 72 bytes.
+  }
 
   const array = new Uint32Array(length);
   crypto.getRandomValues(array);

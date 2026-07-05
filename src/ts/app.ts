@@ -1,5 +1,4 @@
-import "katex/dist/katex.min.css";
-import katex from "katex";
+
 import {
   evaluatePassword,
   calculateCrackTime,
@@ -24,7 +23,6 @@ initHashSelector();
 initGenerateButton();
 initAdvancedPanelToggle();
 initDynamicFormatOptionsInteractivity();
-initTerminalCopyBtn();
 
 // Tier → DOM element id; module-level to avoid per-call recreation.
 const TIER_EL_MAP: [HardwareTier, string][] = [
@@ -48,9 +46,6 @@ function initPassphraseInput(): void {
   const clearBtn = document.getElementById("clear-input-btn");
   const copyBtn = document.getElementById(
     "copy-btn",
-  ) as HTMLButtonElement | null;
-  const termCopyBtn = document.getElementById(
-    "terminal-copy-btn",
   ) as HTMLButtonElement | null;
 
   if (!textarea) return;
@@ -97,11 +92,7 @@ function initPassphraseInput(): void {
       }
     }
 
-    // Reset Terminal Copy Button
-    if (termCopyBtn) {
-      termCopyBtn.disabled = !hasContent || !!invalidChar;
-      termCopyBtn.textContent = "Copy";
-    }
+
 
     if (hasContent && !invalidChar) {
       clearTimeout(evaluateTimeout);
@@ -111,16 +102,16 @@ function initPassphraseInput(): void {
         evaluatePassword(textarea.value, algo).then((result) => {
           if (!result || currentJobId !== latestInputJobId) return;
           updateCrackTimes(result.guesses);
-          updateResistanceBadge(result.score);
-          updateTerminalTelemetry(textarea.value, result, algo);
+          updateCrackTimeBadge(result.guesses, algo);
+          updateConsole(textarea.value, result, algo);
         });
-      }, 150);
+      }, 500);
     } else {
       clearTimeout(evaluateTimeout);
       latestInputJobId++;
       resetCrackTimes();
-      resetResistanceBadge();
-      resetTerminalTelemetry();
+      resetCrackTimeBadge();
+      resetConsole();
     }
 
     adjustHeight();
@@ -145,13 +136,9 @@ function initPassphraseInput(): void {
         copyBtn.disabled = true;
         copyBtn.classList.remove("btn-unsupported");
       }
-      if (termCopyBtn) {
-        termCopyBtn.textContent = "Copy";
-        termCopyBtn.disabled = true;
-      }
       resetCrackTimes();
-      resetResistanceBadge();
-      resetTerminalTelemetry();
+      resetCrackTimeBadge();
+      resetConsole();
       textarea.focus();
     });
   }
@@ -159,7 +146,7 @@ function initPassphraseInput(): void {
 
 function initTargetTimeValueInput(): void {
   const input = document.getElementById(
-    "target-time-value",
+    "minimum-time-value",
   ) as HTMLInputElement | null;
   if (!input) return;
 
@@ -287,7 +274,7 @@ function initTooltips(): void {
       title.addEventListener("click", (e) => {
         e.stopPropagation();
         const container = title.closest(
-          ".label-with-tooltip, .title-with-tooltip, .aligned-settings-row, .section-card, .terminal-header",
+          ".label-with-tooltip, .title-with-tooltip, .aligned-settings-row, .section-card, .console-header",
         );
         const trigger =
           container?.querySelector<HTMLButtonElement>(".tooltip-trigger");
@@ -321,19 +308,10 @@ function initHashSelector(): void {
     const currentJobId = ++latestInputJobId;
     const algo = hashSelect.value as Algorithm;
 
-    // Reset Terminal Copy Button when hash changes
-    const termCopyBtn = document.getElementById(
-      "terminal-copy-btn",
-    ) as HTMLButtonElement | null;
-    if (termCopyBtn) {
-      termCopyBtn.textContent = "Copy";
-      termCopyBtn.disabled = false;
-    }
-
     evaluatePassword(textarea.value, algo).then((result) => {
       if (!result || currentJobId !== latestInputJobId) return;
       updateCrackTimes(result.guesses);
-      updateTerminalTelemetry(textarea.value, result, algo);
+      updateConsole(textarea.value, result, algo);
     });
   });
 }
@@ -362,14 +340,19 @@ function resetCrackTimes(): void {
   }
 }
 
-function updateResistanceBadge(score: number): void {
-  const badge = document.getElementById("resistance-badge");
+function updateCrackTimeBadge(guesses: number, algo: Algorithm): void {
+  const badge = document.getElementById("crack-time-badge");
   if (!badge) return;
   badge.classList.remove("badge-low", "badge-medium", "badge-high");
-  if (score <= 1) {
+  
+  const crackTime = calculateCrackTime(guesses, "supercomputer", algo);
+
+  // 1 Year threshold = 31,536,000 seconds
+  // 1 Century threshold = 3,153,600,000 seconds
+  if (crackTime < 31536000) {
     badge.textContent = "Low";
     badge.classList.add("badge-low");
-  } else if (score === 2) {
+  } else if (crackTime < 3153600000) {
     badge.textContent = "Medium";
     badge.classList.add("badge-medium");
   } else {
@@ -378,8 +361,8 @@ function updateResistanceBadge(score: number): void {
   }
 }
 
-function resetResistanceBadge(): void {
-  const badge = document.getElementById("resistance-badge");
+function resetCrackTimeBadge(): void {
+  const badge = document.getElementById("crack-time-badge");
   if (!badge) return;
   badge.textContent = "Low";
   badge.classList.remove("badge-medium", "badge-high");
@@ -395,10 +378,10 @@ function initGenerateButton(): void {
     "target-hardware",
   ) as HTMLSelectElement | null;
   const targetTimeValueInput = document.getElementById(
-    "target-time-value",
+    "minimum-time-value",
   ) as HTMLInputElement | null;
   const targetTimeUnitSelect = document.getElementById(
-    "target-time-unit",
+    "minimum-time-unit",
   ) as HTMLSelectElement | null;
   const hashSelect = document.getElementById(
     "hash-algorithm",
@@ -447,6 +430,7 @@ function initGenerateButton(): void {
     textarea.value = generateTargetedPassphrase(
       format as "ascii" | "numeric",
       requiredGuesses,
+      algo,
     );
     textarea.dispatchEvent(new Event("input"));
   });
@@ -515,26 +499,23 @@ function buildPatternLines(sequence: any[]): {
       if (dictionary === "passwords") inCommonPasswords = true;
 
       if (match.l33t) {
-        const subs = Object.entries(match.sub ?? {})
-          .map(([k, v]) => `${k}→${v}`)
-          .join(", ");
-        desc = `• Dict Match: "${match.token}" → "${match.matchedWord}" (${dictionary}) [l33t: ${subs}]`;
+        desc = `"${match.token}" is in [${dictionary} l33t]`;
       } else {
-        desc = `• Dict Match: "${match.token}" → "${match.matchedWord}" (${dictionary})`;
+        desc = `"${match.token}" is in [${dictionary}]`;
       }
     } else if (match.pattern === "spatial") {
-      desc = `• Spatial Match: "${match.token}" (keyboard pattern, turns: ${match.turns})`;
+      desc = `"${match.token}" is in [spatial]`;
     } else if (match.pattern === "repeat") {
-      desc = `• Repeat Match: "${match.token}" (repeated "${match.base_token}" x ${match.repeat_count})`;
+      desc = `"${match.token}" is in [repeat]`;
     } else if (match.pattern === "sequence") {
-      desc = `• Sequence Match: "${match.token}" (linear sequence)`;
+      desc = `"${match.token}" is in [sequence]`;
     } else if (match.pattern === "regex") {
-      desc = `• Regex Match: "${match.token}" (matched pattern)`;
+      desc = `"${match.token}" is in [regex]`;
     }
 
     if (desc) {
       lines.push(
-        `<div class="terminal-line log-warning" style="padding-left: 1rem;">${desc}</div>`,
+        `<div class="console-line log-info">${desc}</div>`,
       );
     }
   }
@@ -542,15 +523,15 @@ function buildPatternLines(sequence: any[]): {
   return { lines, inCommonPasswords };
 }
 
-function updateTerminalTelemetry(
+function updateConsole(
   password: string,
   result: ZxcvbnResult,
   algo: Algorithm,
 ): void {
-  const terminalBody = document.getElementById("telemetry-output");
-  const statusDot = document.querySelector(".terminal-status-dot");
-  const statusText = document.querySelector(".terminal-status");
-  if (!terminalBody) return;
+  const consoleBody = document.getElementById("console-output");
+  const statusDot = document.querySelector(".console-status-dot");
+  const statusText = document.querySelector(".console-status");
+  if (!consoleBody) return;
 
   if (statusDot) statusDot.classList.add("active");
   if (statusText) {
@@ -558,86 +539,70 @@ function updateTerminalTelemetry(
     statusText.textContent = "ACTIVE";
   }
 
+  let kdfParams = "N/A";
+  if (algo === "pbkdf2") kdfParams = "m=N/A, t=600000, p=1";
+  else if (algo === "bcrypt") kdfParams = "cost=10";
+  else if (algo === "argon2id") kdfParams = "m=65536, t=3, p=1";
+  else if (algo === "sha256" || algo === "md5") kdfParams = "raw";
+
   const lines: string[] = [
-    `<div class="terminal-line log-system">[EVAL] Running passphrase telemetry (algo: ${algo})...</div>`,
-    `<div class="terminal-line log-system">[SYS] Input Length: ${password.length} characters</div>`,
-    `<div class="terminal-line log-info">[HASH] ${algo.toUpperCase()}: <span class="log-success">${result.hashValue || "Computing hash..."}</span></div>`,
-    `<div class="terminal-line log-system">[PROOF] Keyspace complexity estimation:</div>`,
+    `<div class="console-line log-info">[CRYPTOGRAPHY]</div>`,
+    `<div class="console-line log-info">Algorithm: ${algo.toUpperCase()} (${kdfParams})</div>`,
+    `<div class="console-line log-info">Hash: ${result.hashValue || "..."}</div>`
   ];
 
-  try {
-    const log2Guesses = Math.log2(result.guesses);
-    const entropyBits = log2Guesses.toFixed(2);
-    const log10Guesses = log2Guesses / Math.log2(10); // log10 via log2 change-of-base
-
-    const guessesSci =
-      result.guesses >= 1000
-        ? (() => {
-            const exponent = Math.floor(log10Guesses);
-            const coefficient = (result.guesses / 10 ** exponent).toFixed(2);
-            return `${coefficient} \\times 10^{${exponent}}`;
-          })()
-        : String(result.guesses);
-
-    const eqGuesses = katex.renderToString(`G \\approx ${guessesSci}`, {
-      throwOnError: false,
-    });
-    const eqEntropy = katex.renderToString(
-      `E = \\log_2(G) \\approx ${entropyBits} \\text{ bits}`,
-      { throwOnError: false },
-    );
-    const eqVerify = katex.renderToString(`2^{${entropyBits}} \\approx G`, {
-      throwOnError: false,
-    });
-
-    lines.push(`<div class="terminal-line log-info" style="padding-left: 1rem; display: flex; flex-direction: column; gap: 0.25rem;">
-      <div>• Guesses: ${eqGuesses}</div>
-      <div>• Entropy: ${eqEntropy}</div>
-      <div>• Equation: ${eqVerify}</div>
-    </div>`);
-  } catch {
+  if (algo === "bcrypt" && password.length > 72) {
     lines.push(
-      `<div class="terminal-line log-error">• KaTeX rendering failed</div>`,
+      `<div class="console-line log-info">Warning: bcrypt silently truncates input at 72 bytes.</div>`
     );
   }
 
+  const log2Guesses = Math.log2(result.guesses);
+  const entropyBits = log2Guesses.toFixed(2);
+  const log10Guesses = log2Guesses / Math.log2(10);
+
+  const guessesSci =
+    result.guesses >= 1000
+      ? (() => {
+          const exponent = Math.floor(log10Guesses);
+          const coefficient = (result.guesses / 10 ** exponent).toFixed(2);
+          return `${coefficient} * 10^${exponent}`;
+        })()
+      : String(result.guesses);
+
   lines.push(
-    `<div class="terminal-line log-system">[PATTERN] Telemetry analysis:</div>`,
+    `<div class="console-line log-info">Guesses: G ≈ ${guessesSci}</div>`,
+    `<div class="console-line log-info">Entropy: E = ${entropyBits} bits</div>`
   );
 
   const { lines: patternLines, inCommonPasswords } = buildPatternLines(
     result.sequence ?? [],
   );
 
+  lines.push(`<div class="console-line log-info">&nbsp;</div>`);
+  lines.push(`<div class="console-line log-info">[VULNERABILITIES]</div>`);
+
   if (patternLines.length > 0) {
     lines.push(...patternLines);
   } else {
+    lines.push(`<div class="console-line log-info">No Vulnerability Patterns Detected</div>`);
+  }
+
+  if (inCommonPasswords) {
     lines.push(
-      `<div class="terminal-line log-info" style="padding-left: 1rem;">• No heuristic patterns detected. Brute-force verification required.</div>`,
+      `<div class="console-line log-info">Danger: Base password found in top-passwords lists</div>`
     );
   }
 
-  lines.push(
-    `<div class="terminal-line log-system">[DICTIONARY] Database check:</div>`,
-  );
-  lines.push(
-    inCommonPasswords
-      ? `<div class="terminal-line log-error" style="padding-left: 1rem; font-weight: bold;">[!] DANGER: Base password found in top-passwords lists!</div>`
-      : `<div class="terminal-line log-success" style="padding-left: 1rem;">[✓] Passphrase structure clean from common password lists.</div>`,
-  );
-  lines.push(
-    `<div class="terminal-line log-system">[MONITOR] Telemetry stream updated.</div>`,
-  );
-
-  terminalBody.innerHTML = lines.join("");
-  terminalBody.scrollTop = terminalBody.scrollHeight;
+  consoleBody.innerHTML = lines.join("\n");
+  consoleBody.scrollTop = consoleBody.scrollHeight;
 }
 
-function resetTerminalTelemetry(): void {
-  const terminalBody = document.getElementById("telemetry-output");
-  const statusDot = document.querySelector(".terminal-status-dot");
-  const statusText = document.querySelector(".terminal-status");
-  if (!terminalBody) return;
+function resetConsole(): void {
+  const consoleBody = document.getElementById("console-output");
+  const statusDot = document.querySelector(".console-status-dot");
+  const statusText = document.querySelector(".console-status");
+  if (!consoleBody) return;
 
   if (statusDot) statusDot.classList.remove("active");
   if (statusText) {
@@ -645,13 +610,15 @@ function resetTerminalTelemetry(): void {
     statusText.textContent = "OFFLINE";
   }
 
-  terminalBody.innerHTML = `
-    <div class="terminal-line log-system">[SYS] Initializing entropy telemetry sandbox...</div>
-    <div class="terminal-line log-system">[SYS] Hashing engine: hash-wasm (WASM loaded)</div>
-    <div class="terminal-line log-system">[SYS] Entropy estimator: @zxcvbn-ts (Offline dictionary loaded)</div>
-    <div class="terminal-line log-system">[SYS] CSP: Connect-src blocked. WebWorker thread: Spawned.</div>
-    <div class="terminal-line log-info">Ready. Enter passphrase to stream telemetry.</div>
-    <div class="terminal-line log-system">[MONITOR] Awaiting entropy stream...</div>
+  consoleBody.innerHTML = `
+    <div class="console-line log-info">[SYSTEM READY]</div>
+    <div class="console-line log-info">Engines: zxcvbn-ts, hash-wasm</div>
+    <div class="console-line log-info">Active Language Packages:</div>
+    <div class="console-line log-info">- @zxcvbn-ts/language-common</div>
+    <div class="console-line log-info">- @zxcvbn-ts/language-en</div>
+    <div class="console-line log-info">- @zxcvbn-ts/language-fa</div>
+    <div class="console-line log-info">&nbsp;</div>
+    <div class="console-line log-info">Awaiting input stream...</div>
   `;
 }
 
@@ -680,18 +647,4 @@ function executeCopy(text: string, btn: HTMLButtonElement): void {
   } else {
     fallbackCopy();
   }
-}
-
-function initTerminalCopyBtn(): void {
-  const btn = document.getElementById(
-    "terminal-copy-btn",
-  ) as HTMLButtonElement | null;
-  const output = document.getElementById("telemetry-output");
-
-  if (!btn || !output) return;
-
-  btn.addEventListener("click", () => {
-    if (btn.disabled) return;
-    executeCopy(output.innerText, btn);
-  });
 }

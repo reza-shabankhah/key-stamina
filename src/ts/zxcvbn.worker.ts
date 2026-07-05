@@ -2,7 +2,10 @@ import { ZxcvbnFactory } from "@zxcvbn-ts/core";
 import * as zxcvbnCommonPackage from "@zxcvbn-ts/language-common";
 import * as zxcvbnEnPackage from "@zxcvbn-ts/language-en";
 import * as zxcvbnFaPackage from "@zxcvbn-ts/language-fa";
-import { md5, sha256, bcrypt, pbkdf2, argon2id } from "hash-wasm";
+import { md5, sha256, bcrypt, pbkdf2, argon2id, createSHA256 } from "hash-wasm";
+
+const SALT_16 = new Uint8Array([0x5b, 0x11, 0x9a, 0xf6, 0x3d, 0x8e, 0x4c, 0x22, 0xb9, 0x73, 0x0f, 0xc8, 0x1a, 0xd5, 0x6e, 0x90]);
+const SALT_8 = new Uint8Array([0x8a, 0x3c, 0x5f, 0x1d, 0x9e, 0x2b, 0x74, 0x06]);
 
 const zxcvbn = new ZxcvbnFactory({
   dictionary: {
@@ -25,24 +28,24 @@ async function hashPassword(password: string, algo: string): Promise<string> {
       case "pbkdf2":
         return await pbkdf2({
           password,
-          salt: new Uint8Array(8),
-          iterations: 1000,
-          hashAlgorithm: "SHA-256",
-          keyLength: 32,
+          salt: SALT_8,
+          iterations: 600000,
+          hashFunction: createSHA256(),
+          hashLength: 32,
         });
       case "bcrypt":
         return await bcrypt({
           password,
-          salt: new Uint8Array(16),
-          cost: 4,
+          salt: SALT_16,
+          costFactor: 10,
         });
       case "argon2id":
         return await argon2id({
           password,
-          salt: new Uint8Array(16),
+          salt: SALT_16,
           parallelism: 1,
-          iterations: 1,
-          memorySize: 512,
+          iterations: 3,
+          memorySize: 65536,
           hashLength: 16,
           outputType: "encoded",
         });
