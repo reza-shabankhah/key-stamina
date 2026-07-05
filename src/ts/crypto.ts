@@ -1,5 +1,5 @@
 import ZxcvbnWorker from "./zxcvbn.worker?worker&inline";
-
+import { dicewareList } from "./diceware-list";
 export type HardwareTier = "laptop" | "pc" | "server" | "supercomputer";
 export type Algorithm = "md5" | "sha256" | "pbkdf2" | "bcrypt" | "argon2id";
 
@@ -167,43 +167,48 @@ export function formatTime(seconds: number): { value: string; unit: string } {
   return { value: valueStr, unit };
 }
 
-export function calculateRequiredGuesses(
-  timeValue: number,
-  unit: TimeUnit,
-  hardware: HardwareTier,
-  algo: Algorithm,
-): number {
-  return timeValue * TIME_UNIT_SECONDS[unit] * HASH_RATES[hardware][algo];
+
+
+export interface AsciiConfig {
+  useUpper: boolean;
+  useLower: boolean;
+  useNum: boolean;
+  useSym: boolean;
+  useAmbig: boolean;
 }
 
-const CHARSETS: Record<"ascii" | "numeric", string> = {
-  numeric: "0123456789",
-  ascii:
-    " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
-};
+export function buildAsciiPool(config: AsciiConfig): string {
+  let pool = "";
 
-export function generateTargetedPassphrase(
-  format: "ascii" | "numeric",
-  guesses: number,
-  algo: Algorithm,
-): string {
-  const charset = CHARSETS[format];
-  const c = charset.length;
-  let length = Math.min(
-    Math.max(guesses > 1 ? Math.ceil(Math.log2(guesses) / Math.log2(c)) : 1, 1),
-    128,
-  );
+  if (config.useUpper)     pool += "ACDEFHJKMNPQRSTUVWXY";
+  if (config.useLower)     pool += "abcdefghjkmnpqrstuvwxyz";
+  if (config.useNum)       pool += "3479";
+  if (config.useSym)       pool += " !#$%&()*+-/<=>?@[]^_{}";
+  if (config.useAmbig)     pool += "0Oo1lLiI|\\'\"`~.,:;B8S5Z2G6";
 
-  if (algo === "bcrypt" && length > 72) {
-    length = 72; // Bcrypt silently truncates inputs larger than 72 bytes.
+  if (pool.length === 0) {
+    throw new Error("Character pool cannot be empty. Please select at least one character set.");
   }
 
+  return pool;
+}
+
+export function generateAscii(length: number, pool: string): string {
   const array = new Uint32Array(length);
   crypto.getRandomValues(array);
-
   let result = "";
   for (let i = 0; i < length; i++) {
-    result += charset[array[i] % c];
+    result += pool[array[i] % pool.length];
   }
   return result;
+}
+
+export function generateDiceware(length: number, separator: string): string {
+  const array = new Uint32Array(length);
+  crypto.getRandomValues(array);
+  const words: string[] = [];
+  for (let i = 0; i < length; i++) {
+    words.push(dicewareList[array[i] % dicewareList.length]);
+  }
+  return words.join(separator);
 }

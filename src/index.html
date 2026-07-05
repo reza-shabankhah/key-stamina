@@ -129,14 +129,12 @@
                       <div class="tooltip-content" role="tooltip">
                         <strong>ASCII Generator:</strong><br />
                         Creates a highly entropic string of random characters.<br />
-                        <em style="color: var(--text-muted);"><strong>Pro Tip:</strong> Deselect "Ambiguous" to remove
-                        visually confusing characters like <span
+                        <em style="color: var(--text-muted);">The "Ambiguous" option isolates visually confusing characters like <span
                           style="font-family: monospace; color: var(--text-main);">0, O, l, 1, I</span>.</em><br /><br />
 
                         <strong>Diceware Generator:</strong><br />
                         Creates a long, memorable sequence of random dictionary words.<br />
-                        <em style="color: var(--text-muted);"><strong>Pro Tip:</strong> Diceware is mathematically
-                        stronger and easier for humans to memorize than complex ASCII strings.</em>
+                        <em style="color: var(--text-muted);">This method yields passphrases that are mathematically strong while remaining easy for humans to memorize.</em>
                       </div>
                     </div>
                   </div>
@@ -179,56 +177,22 @@
                     <div class="aligned-settings-row">
                       <span class="input-field-label clickable-title">Separator Character:</span>
                       <input type="text" id="diceware-separator" class="custom-text-input size-separator-input"
-                        value=" " maxlength="1" />
+                        value=" " />
                     </div>
                   </div>
                 </div>
 
-                <div class="advanced-crack-group">
-                  <div class="aligned-settings-row margin-bottom-sm">
-                    <div class="label-with-tooltip">
-                      <span class="input-field-label clickable-title">Minimum Crack Time:</span>
-                      <div class="tooltip-container">
-                        <button class="tooltip-trigger" aria-label="Minimum crack time info" type="button">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="tooltip-icon">
-                            <circle cx="12" cy="12" r="10" stroke-width="1.6" />
-                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke-width="2.8" />
-                            <circle cx="12" cy="17" r="1.4" fill="currentColor" stroke="none" />
-                          </svg>
-                        </button>
-                        <div class="tooltip-content" role="tooltip">
-                          <strong>Mathematical Security Baseline:</strong><br />
-                          Generates a passphrase with enough mathematical entropy to guarantee it will survive an
-                          intelligent hybrid attack (dictionary + brute force) for <strong>at least</strong> the
-                          specified duration on the selected hardware tier.
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="crack-time-inputs">
-                    <div class="select-wrapper">
-                      <select id="target-hardware" class="custom-select" aria-label="Target hardware model">
-                        <option value="laptop">Average Laptop</option>
-                        <option value="pc">High-end PC</option>
-                        <option value="server">Enterprise Server</option>
-                        <option value="supercomputer" selected>
-                          Supercomputer
-                        </option>
-                      </select>
-                    </div>
-                    <input id="minimum-time-value" class="custom-num-input" type="text" inputmode="numeric" value="1"
-                      aria-label="Minimum crack time value" />
-                    <div class="select-wrapper">
-                      <select id="minimum-time-unit" class="custom-select" aria-label="Minimum crack time unit">
-                        <option value="seconds">Seconds</option>
-                        <option value="minutes">Minutes</option>
-                        <option value="hours">Hours</option>
-                        <option value="days">Days</option>
-                        <option value="years">Years</option>
-                        <option value="centuries" selected>Centuries</option>
-                      </select>
+                <div class="advanced-length-group">
+                  <div class="aligned-settings-row">
+                    <span id="length-title-label" class="input-field-label clickable-title">Number of characters:</span>
+                    <div class="length-stepper-inputs">
+                      <button id="length-decrease" class="stepper-btn" type="button" aria-label="Decrease length">
+                        &minus;
+                      </button>
+                      <input id="length-input" class="custom-num-input length-input-field" type="text" inputmode="numeric" value="14" aria-label="Generation length" />
+                      <button id="length-increase" class="stepper-btn" type="button" aria-label="Increase length">
+                        &plus;
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -310,14 +274,13 @@
             <h2 class="card-title">CRYPTOGRAPHY CONSOLE</h2>
           </div>
           <div class="console-body" id="console-output" tabindex="-1">
-            <div class="console-line log-info">[SYSTEM READY]</div>
-            <div class="console-line log-info">Engines: zxcvbn-ts, hash-wasm</div>
-            <div class="console-line log-info">Active Language Packages:</div>
-            <div class="console-line log-info">- @zxcvbn-ts/language-common</div>
-            <div class="console-line log-info">- @zxcvbn-ts/language-en</div>
-            <div class="console-line log-info">- @zxcvbn-ts/language-fa</div>
-            <div class="console-line log-info">&nbsp;</div>
-            <div class="console-line log-info">Awaiting input stream...</div>
+            <div class="console-line">[Engine Status]</div>
+            <div class="console-line">Awaiting input stream...</div>
+            <div class="console-line"><br/></div>
+            <div class="console-line">Active zxcvbn language Packages:</div>
+            <div class="console-line">- common</div>
+            <div class="console-line">- en</div>
+            <div class="console-line">- fa</div>
           </div>
       </div>
       </section>
