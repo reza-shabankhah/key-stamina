@@ -189,12 +189,12 @@ class ConsoleManager {
         result.sequence.forEach((match: any) => {
           if (match.pattern !== "bruteforce") {
             foundVuln = true;
-            
+
             let desc = "";
             if (match.pattern === "dictionary") {
               const dictionary = match.dictionaryName ?? "unknown";
               if (dictionary === "passwords") inCommonPasswords = true;
-              
+
               if (match.l33t) {
                 desc = `"${match.token}" is in [${dictionary} l33t]`;
               } else {
@@ -214,7 +214,7 @@ class ConsoleManager {
         } else if (inCommonPasswords) {
           lines.push(`<div class="console-line"><br/></div>`);
           lines.push(
-            `<div class="console-line">Danger: Base password found in top-passwords lists</div>`
+            `<div class="console-line">Danger: Base password found in top-passwords lists</div>`,
           );
         }
       }
@@ -811,7 +811,11 @@ function initGenerateButton(): void {
               new Set(
                 currentResult.sequence
                   .filter((m: any) => m.pattern !== "bruteforce")
-                  .map((m: any) => m.pattern === "dictionary" ? `${m.dictionaryName || 'unknown'} dictionary` : m.pattern),
+                  .map((m: any) =>
+                    m.pattern === "dictionary"
+                      ? `${m.dictionaryName || "unknown"} dictionary`
+                      : m.pattern,
+                  ),
               ),
             );
             ConsoleManager.getInstance().setState("processing_generation", {
@@ -846,7 +850,6 @@ function initGenerateButton(): void {
       finalPassphrase = candidate;
       finalResult = await evaluatePassword(candidate, algo);
     }
-
 
     generateBtn.innerHTML = originalBtnText;
     generateBtn.disabled = false;
@@ -997,3 +1000,9 @@ function initGlobalKeyboardListener(): void {
     }
   });
 }
+
+document.addEventListener("change", (e) => {
+  if (e.target instanceof HTMLSelectElement) {
+    e.target.blur();
+  }
+});
