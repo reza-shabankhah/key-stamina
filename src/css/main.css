@@ -43,7 +43,8 @@
     monospace;
 
   --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-label: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 *,
@@ -135,10 +136,10 @@ textarea {
     rgb(from var(--accent-neon) r g b / 4%) 45%,
     transparent 100%
   );
-  top: auto;
-  bottom: 12.5vh;
+  top: 87.5lvh;
+  bottom: auto;
   left: 25vw;
-  transform: translate(-50%, 50%) translateZ(0);
+  transform: translate(-50%, -50%) translateZ(0);
 }
 
 /* LAYOUT & GRID ============================================================ */
@@ -184,7 +185,7 @@ textarea {
 .app-header {
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   padding-top: 0;
-  padding-bottom: 1rem;
+  padding-bottom: 1.5rem;
   margin: 0;
 }
 
@@ -211,19 +212,11 @@ textarea {
 }
 
 .app-title {
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.025em;
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-
-.app-version {
-  font-size: 0.8rem;
-  font-weight: 400;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
+  line-height: 1;
+  margin: 0;
 }
 
 .card-title {
@@ -303,12 +296,12 @@ textarea {
   z-index: 50;
 
   transition:
-    border-color var(--transition-normal),
-    box-shadow var(--transition-normal),
+    border-color 0s,
+    box-shadow 0s,
     z-index 0s linear 0s;
 }
 
-.section-card:focus-within {
+.section-card:not(.console-card):focus-within {
   border-color: rgba(255, 255, 255, 0.22);
   box-shadow:
     0 12px 40px rgba(0, 0, 0, 0.6),
@@ -687,7 +680,7 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  scroll-margin-top: 4px;
+  scroll-margin-top: 1.25rem;
 }
 
 .passphrase-border-box {
@@ -761,6 +754,7 @@ textarea {
 
 .passphrase-textarea {
   width: 100%;
+  min-height: 28px;
   background: transparent;
   border: none;
   resize: none;
@@ -769,13 +763,12 @@ textarea {
   color: var(--text-main);
   outline: none;
   overflow: hidden;
-  height: 28px;
-  will-change: height;
   line-height: 1.5;
   display: block;
   overflow-wrap: break-word;
   word-break: break-all;
   padding: 0;
+  field-sizing: content;
 }
 
 .floating-label {
@@ -791,11 +784,11 @@ textarea {
   pointer-events: none;
   transform-origin: top left;
   transition:
-    transform var(--transition-normal),
-    color var(--transition-normal),
-    background var(--transition-normal),
-    box-shadow var(--transition-normal),
-    text-shadow var(--transition-normal);
+    transform var(--transition-label),
+    color var(--transition-label),
+    background var(--transition-label),
+    box-shadow var(--transition-label),
+    text-shadow var(--transition-label);
   border-radius: 4px;
   z-index: 4;
   display: flex;
@@ -809,18 +802,20 @@ textarea {
   min-width: 0;
   opacity: 1;
   transition:
-    opacity var(--transition-normal),
-    max-width var(--transition-normal);
+    opacity var(--transition-label),
+    max-width var(--transition-label);
   white-space: pre;
 }
 
-.passphrase-textarea:focus ~ .floating-label .label-prefix,
+.passphrase-textarea.is-generating ~ .floating-label .label-prefix,
+.passphrase-border-box:focus-within .floating-label .label-prefix,
 .passphrase-textarea:not(:placeholder-shown) ~ .floating-label .label-prefix {
   opacity: 0;
   max-width: 0;
 }
 
-.passphrase-textarea:focus ~ .floating-label,
+.passphrase-textarea.is-generating ~ .floating-label,
+.passphrase-border-box:focus-within .floating-label,
 .passphrase-textarea:not(:placeholder-shown) ~ .floating-label {
   transform: translate(0px, -27px) scale(0.75);
   color: var(--accent-neon);
@@ -834,7 +829,8 @@ textarea {
   color: var(--text-muted);
 }
 
-.passphrase-textarea:focus ~ .floating-label .char-counter-badge,
+.passphrase-textarea.is-generating ~ .floating-label .char-counter-badge,
+.passphrase-border-box:focus-within .floating-label .char-counter-badge,
 .passphrase-textarea:not(:placeholder-shown)
   ~ .floating-label
   .char-counter-badge {
@@ -965,6 +961,10 @@ textarea {
   flex: 1;
   color: var(--accent-neon);
   font-weight: 800;
+}
+
+#generate-btn {
+  transition: none !important;
 }
 
 .generate-btn-symmetric:active:not(:disabled) {
@@ -1165,7 +1165,7 @@ textarea {
 .console-card {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 440px;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 12px;
@@ -1183,7 +1183,27 @@ textarea {
   isolation: isolate;
 }
 
-.console-card:active {
+.console-card::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 1), transparent);
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 10;
+}
+
+.console-card.is-scrollable::after {
+  opacity: 1;
+}
+
+.console-card:has(.console-header:active) {
   border-color: rgba(255, 255, 255, 0.18);
   box-shadow:
     0 12px 40px rgba(0, 0, 0, 0.55),
@@ -1485,23 +1505,6 @@ textarea {
   }
 }
 
-@keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-
-  20%,
-  60% {
-    transform: translateX(-4px);
-  }
-
-  40%,
-  80% {
-    transform: translateX(4px);
-  }
-}
-
 .spinner {
   display: inline-block;
   width: 16px;
@@ -1514,10 +1517,54 @@ textarea {
   vertical-align: middle;
 }
 
-.shake-warning {
-  animation: shake 0.4s ease-in-out;
-  color: var(--accent-red) !important;
-  border-color: var(--accent-red) !important;
+.options-group.show-warning-popup {
+  position: relative;
+}
+
+.options-group.show-warning-popup::after {
+  content: "At least one option must be selected";
+  position: absolute;
+  top: -52px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(14, 15, 18, 0.95);
+  backdrop-filter: blur(10px) saturate(200%);
+  -webkit-backdrop-filter: blur(10px) saturate(200%);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.6),
+    inset 0 1px 1px rgba(255, 255, 255, 0.12);
+  color: var(--text-main);
+  font-size: 0.75rem;
+  height: 2.25rem;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.8rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 100;
+  animation: popup-fade 2s forwards ease-in-out;
+}
+
+@keyframes popup-fade {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 4px);
+  }
+
+  10%,
+  90% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 0);
+  }
 }
 
 /* RESPONSIVE OVERRIDES ===================================================== */

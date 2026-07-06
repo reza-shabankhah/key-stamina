@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=overlays-content" />
   <meta name="description"
     content="KeyStamina - Modern cryptographic passphrase generator, strength analyzer, and heuristic entropy visualization tool." />
   <meta name="color-scheme" content="dark" />
@@ -26,9 +26,7 @@
     <header class="app-header">
       <div class="logo-wrapper">
         <img src="assets/img/logo.svg" alt="KeyStamina Logo" class="app-logo" />
-        <h1 class="app-title">
-          KeyStamina <span class="app-version">v1.0</span>
-        </h1>
+        <h1 class="app-title">KeyStamina</h1>
       </div>
     </header>
 
@@ -129,12 +127,14 @@
                       <div class="tooltip-content" role="tooltip">
                         <strong>ASCII Generator:</strong><br />
                         Creates a highly entropic string of random characters.<br />
-                        <em style="color: var(--text-muted);">The "Ambiguous" option isolates visually confusing characters like <span
-                          style="font-family: monospace; color: var(--text-main);">0, O, l, 1, I</span>.</em><br /><br />
+                        <em style="color: var(--text-muted);">The "Ambiguous" option isolates visually confusing
+                          characters like <span style="font-family: monospace; color: var(--text-main);">0, O, l, 1,
+                            I</span>.</em><br /><br />
 
                         <strong>Diceware Generator:</strong><br />
                         Creates a long, memorable sequence of random dictionary words.<br />
-                        <em style="color: var(--text-muted);">This method yields passphrases that are mathematically strong while remaining easy for humans to memorize.</em>
+                        <em style="color: var(--text-muted);">This method yields passphrases that are mathematically
+                          strong while remaining easy for humans to memorize.</em>
                       </div>
                     </div>
                   </div>
@@ -189,7 +189,8 @@
                       <button id="length-decrease" class="stepper-btn" type="button" aria-label="Decrease length">
                         &minus;
                       </button>
-                      <input id="length-input" class="custom-num-input length-input-field" type="text" inputmode="numeric" value="14" aria-label="Generation length" />
+                      <input id="length-input" class="custom-num-input length-input-field" type="text"
+                        inputmode="numeric" value="14" aria-label="Generation length" />
                       <button id="length-increase" class="stepper-btn" type="button" aria-label="Increase length">
                         &plus;
                       </button>
@@ -219,12 +220,13 @@
                 <div class="tooltip-content" role="tooltip">
                   <strong>Keyspace Exhaustion Time:</strong><br />
                   The estimated time required for specialized hardware to successfully guess the passphrase.<br /><br />
-                  <strong>Hardware Baselines (2026):</strong><br />
-                  - <strong>Laptop:</strong> Integrated iGPU<br />
+                  <strong>Hardware Baselines:</strong><br />
+                  - <strong>Average Laptop:</strong> Intel UHD 770<br />
                   - <strong>High-end PC:</strong> 1x RTX 5090<br />
                   - <strong>Enterprise Server:</strong> 8x RTX 5090 cluster<br />
                   - <strong>Supercomputer:</strong> 1,000x RTX 5090 nodes<br /><br />
-                  <em style="color: var(--text-muted);">Note: Calculation intelligently accounts for targeted dictionary words and keyboard patterns before pure brute-force math.</em>
+                  <em style="color: var(--text-muted);">Note: Calculation intelligently accounts for targeted dictionary
+                    words and keyboard patterns before pure brute-force math.</em>
                 </div>
               </div>
             </div>
@@ -276,7 +278,7 @@
           <div class="console-body" id="console-output" tabindex="-1">
             <div class="console-line">[Engine Status]</div>
             <div class="console-line">Awaiting input stream...</div>
-            <div class="console-line"><br/></div>
+            <div class="console-line"><br /></div>
             <div class="console-line">Active zxcvbn language Packages:</div>
             <div class="console-line">- common</div>
             <div class="console-line">- en</div>

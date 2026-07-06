@@ -73,9 +73,26 @@ class ConsoleManager {
 
   private render() {
     const consoleBody = document.getElementById("console-output");
+    const consoleCard = consoleBody?.closest(".console-card");
     const statusDot = document.querySelector(".console-status-dot");
     const statusText = document.querySelector(".console-status");
     if (!consoleBody) return;
+
+    const checkScrollFade = () => {
+      if (!consoleCard) return;
+      const isScrollable =
+        consoleBody.scrollHeight - consoleBody.scrollTop >
+        consoleBody.clientHeight + 2;
+      consoleCard.classList.toggle("is-scrollable", isScrollable);
+    };
+
+    if (!consoleBody.hasAttribute("data-scroll-listener")) {
+      consoleBody.addEventListener("scroll", checkScrollFade, {
+        passive: true,
+      });
+      window.addEventListener("resize", checkScrollFade, { passive: true });
+      consoleBody.setAttribute("data-scroll-listener", "true");
+    }
 
     let timeText = "";
     if (this.state.startsWith("completed_")) {
@@ -93,7 +110,7 @@ class ConsoleManager {
         statusText.textContent = "IDLE";
       }
       consoleBody.innerHTML = `
-        <div class="console-line">[Engine Status]</div>
+        <div class="console-line">[ENGINE STATUS]</div>
         <div class="console-line">Awaiting input stream...</div>
         <div class="console-line"><br/></div>
         <div class="console-line">Active zxcvbn language Packages:</div>
@@ -108,7 +125,7 @@ class ConsoleManager {
         statusText.textContent = "ACTIVE";
       }
       consoleBody.innerHTML = `
-        <div class="console-line">[Engine Status]</div>
+        <div class="console-line">[ENGINE STATUS]</div>
         <div class="console-line">Processing...${timeText}</div>
         <div class="console-line">Manual input</div>
       `;
@@ -129,7 +146,7 @@ class ConsoleManager {
       }
 
       consoleBody.innerHTML = `
-        <div class="console-line">[Engine Status]</div>
+        <div class="console-line">[ENGINE STATUS]</div>
         <div class="console-line">Processing...${timeText}</div>
         ${vulnerabilityLog}
       `;
@@ -152,7 +169,7 @@ class ConsoleManager {
       else if (algo === "sha256" || algo === "md5") kdfParams = "raw";
 
       const lines: string[] = [
-        `<div class="console-line">[Engine Status]</div>`,
+        `<div class="console-line">[ENGINE STATUS]</div>`,
         `<div class="console-line">Processed${timeText}</div>`,
         `<div class="console-line">${this.state === "completed_manual" ? "Manual input" : `Generated on attempt #${attempt || 1}`}</div>`,
         `<div class="console-line"><br/></div>`,
@@ -176,8 +193,8 @@ class ConsoleManager {
           : result.guesses.toString();
 
       lines.push(
-        `<div class="console-line">Guesses: G ≈ ${guessesSci}</div>`,
-        `<div class="console-line">Entropy: E ≈ ${entropyBits} bits</div>`,
+        `<div class="console-line">Guesses ≈ ${guessesSci}</div>`,
+        `<div class="console-line">Entropy ≈ ${entropyBits} bits</div>`,
       );
 
       if (result.sequence && result.sequence.length > 0) {
@@ -221,6 +238,7 @@ class ConsoleManager {
 
       consoleBody.innerHTML = lines.join("");
     }
+    setTimeout(checkScrollFade, 0);
   }
 }
 
@@ -260,18 +278,6 @@ function initPassphraseInput(): void {
   ) as HTMLButtonElement | null;
 
   if (!textarea) return;
-
-  let heightRaf: number;
-  const adjustHeight = () => {
-    cancelAnimationFrame(heightRaf);
-    heightRaf = requestAnimationFrame(() => {
-      textarea.style.height = "auto";
-      textarea.style.height = textarea.scrollHeight + "px";
-    });
-  };
-
-  window.addEventListener("resize", adjustHeight);
-  adjustHeight();
 
   textarea.addEventListener("keydown", (e: KeyboardEvent) => {
     if (e.key === "Enter") e.preventDefault();
@@ -343,7 +349,6 @@ function initPassphraseInput(): void {
   if (clearBtn) {
     clearBtn.addEventListener("click", () => {
       textarea.value = "";
-      textarea.style.height = "28px";
       if (counter) counter.textContent = "";
       clearBtn.hidden = true;
       if (copyBtn) {
@@ -502,27 +507,24 @@ function initBorderMaskHandling(): void {
 }
 
 function initMobileAutoScroll(): void {
-  const textarea = document.getElementById(
-    "passphrase-input",
-  ) as HTMLTextAreaElement | null;
   const card = document.querySelector(".passphrase-card") as HTMLElement | null;
+  if (!card) return;
 
-  if (!textarea || !card) return;
+  const inputs = [
+    document.getElementById("passphrase-input"),
+    document.getElementById("length-input"),
+    document.getElementById("diceware-separator"),
+  ];
 
-  let isMobile = false;
-  const checkMobile = () => {
-    isMobile = window.innerWidth <= 768;
-  };
-
-  window.addEventListener("resize", checkMobile);
-  checkMobile();
-
-  textarea.addEventListener("focus", () => {
-    if (!isMobile) return;
-
-    setTimeout(() => {
-      card.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 300);
+  inputs.forEach((input) => {
+    if (!input) return;
+    input.addEventListener("focus", () => {
+      if (window.innerWidth <= 768) {
+        setTimeout(() => {
+          card.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 300);
+      }
+    });
   });
 }
 
@@ -721,6 +723,11 @@ function initGenerateButton(): void {
   }
 
   generateBtn.addEventListener("click", async () => {
+    const originalBtnText = generateBtn.innerHTML;
+    textarea.classList.add("is-generating");
+    generateBtn.disabled = true;
+    generateBtn.innerHTML = '<div class="spinner"></div>';
+
     const panel = document.getElementById("advanced-generation-panel");
     const toggleBtn = document.getElementById("toggle-advanced-btn");
 
@@ -731,6 +738,8 @@ function initGenerateButton(): void {
         toggleBtn.setAttribute("aria-label", "Collapse advanced options");
       }
     }
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
 
     const format = formatSelect.value as "ascii" | "diceware";
     const lengthInput = document.getElementById(
@@ -759,13 +768,12 @@ function initGenerateButton(): void {
         });
       } catch (err: any) {
         alert(err.message);
+        generateBtn.innerHTML = originalBtnText;
+        generateBtn.disabled = false;
+        textarea.classList.remove("is-generating");
         return;
       }
     }
-
-    const originalBtnText = generateBtn.innerHTML;
-    generateBtn.disabled = true;
-    generateBtn.innerHTML = '<div class="spinner"></div>';
 
     clearTimeout(evaluateTimeout);
     latestInputJobId++;
@@ -853,12 +861,11 @@ function initGenerateButton(): void {
 
     generateBtn.innerHTML = originalBtnText;
     generateBtn.disabled = false;
+    textarea.classList.remove("is-generating");
 
     if (finalPassphrase && finalResult) {
       isProgrammaticInput = true;
       textarea.value = finalPassphrase;
-      textarea.style.height = "auto";
-      textarea.style.height = textarea.scrollHeight + "px";
 
       textarea.dispatchEvent(new Event("input"));
       isProgrammaticInput = false;
@@ -940,10 +947,17 @@ function initDynamicFormatOptionsInteractivity(): void {
         e.preventDefault();
         cb.checked = true;
 
-        const parentLabel = cb.closest(".custom-checkbox-label");
-        if (parentLabel) {
-          parentLabel.classList.add("shake-warning");
-          setTimeout(() => parentLabel.classList.remove("shake-warning"), 400);
+        const parentGroup = document.getElementById("ascii-options");
+        if (parentGroup) {
+          parentGroup.classList.remove("show-warning-popup");
+          void parentGroup.offsetWidth;
+          parentGroup.classList.add("show-warning-popup");
+
+          const anyGroup = parentGroup as any;
+          if (anyGroup._warningTimeout) clearTimeout(anyGroup._warningTimeout);
+          anyGroup._warningTimeout = setTimeout(() => {
+            parentGroup.classList.remove("show-warning-popup");
+          }, 2000);
         }
       }
     });
