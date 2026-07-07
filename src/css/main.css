@@ -1165,7 +1165,7 @@ textarea {
 .console-card {
   display: flex;
   flex-direction: column;
-  height: 440px;
+  height: 458px;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 12px;
