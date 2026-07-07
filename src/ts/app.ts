@@ -1,14 +1,20 @@
 import {
   evaluatePassword,
   calculateCrackTime,
-  formatTime,
   buildAsciiPool,
-  generateAscii,
-  generateDiceware,
+  generateSecurePassphrase,
+  calculateEntropyMetrics,
+  parseVulnerabilities,
   Algorithm,
   HardwareTier,
+  ALGO_KDF_PARAMS,
+  evaluateResistanceGrade,
+  formatTime,
+  getFirstInvalidEngineChar,
+  isValidEngineChar,
+  sanitizeEngineInput,
+  cancelPendingEvaluations,
 } from "./crypto";
-
 let latestInputJobId = 0;
 let evaluateTimeout: number | undefined;
 let isProgrammaticInput = false;
@@ -160,13 +166,9 @@ class ConsoleManager {
         statusText.textContent = "ACTIVE";
       }
 
-      const { password, result, algo, attempt } = this.lastRenderData;
+      const { result, algo, attempt } = this.lastRenderData;
 
-      let kdfParams = "N/A";
-      if (algo === "pbkdf2") kdfParams = "m=N/A, t=600000, p=1";
-      else if (algo === "bcrypt") kdfParams = "cost=10";
-      else if (algo === "argon2id") kdfParams = "m=65536, t=3, p=1";
-      else if (algo === "sha256" || algo === "md5") kdfParams = "raw";
+      const kdfParams = ALGO_KDF_PARAMS[algo as Algorithm] || "N/A";
 
       const lines: string[] = [
         `<div class="console-line">[ENGINE STATUS]</div>`,
@@ -178,19 +180,15 @@ class ConsoleManager {
         `<div class="console-line">Hash: ${result.hashValue || "..."}</div>`,
       ];
 
-      if (algo === "bcrypt" && password.length > 72) {
-        lines.push(
-          `<div class="console-line">Warning: bcrypt silently truncates input at 72 bytes.</div>`,
-        );
+      if (result.feedback?.warnings) {
+        result.feedback.warnings.forEach((warning: string) => {
+          lines.push(`<div class="console-line">${warning}</div>`);
+        });
       }
 
-      const log2Guesses = Math.log2(result.guesses);
-      const entropyBits = log2Guesses.toFixed(2);
-      const log10Guesses = log2Guesses / Math.log2(10);
-      const guessesSci =
-        log10Guesses >= 4
-          ? `10^${log10Guesses.toFixed(1)}`
-          : result.guesses.toString();
+      const { entropyBits, guessesSci } = calculateEntropyMetrics(
+        result.guesses,
+      );
 
       lines.push(
         `<div class="console-line">Guesses ≈ ${guessesSci}</div>`,
@@ -201,39 +199,14 @@ class ConsoleManager {
         lines.push(`<div class="console-line"><br/></div>`);
         lines.push(`<div class="console-line">[VULNERABILITIES]</div>`);
 
-        let foundVuln = false;
-        let inCommonPasswords = false;
-        result.sequence.forEach((match: any) => {
-          if (match.pattern !== "bruteforce") {
-            foundVuln = true;
-
-            let desc = "";
-            if (match.pattern === "dictionary") {
-              const dictionary = match.dictionaryName ?? "unknown";
-              if (dictionary === "passwords") inCommonPasswords = true;
-
-              if (match.l33t) {
-                desc = `"${match.token}" is in [${dictionary} l33t]`;
-              } else {
-                desc = `"${match.token}" is in [${dictionary}]`;
-              }
-            } else {
-              desc = `"${match.token}" is in [${match.pattern}]`;
-            }
-
-            lines.push(`<div class="console-line">${desc}</div>`);
+        const parsedVulns = parseVulnerabilities(result.sequence);
+        parsedVulns.forEach((vuln) => {
+          if (vuln === "") {
+            lines.push(`<div class="console-line"><br/></div>`);
+          } else {
+            lines.push(`<div class="console-line">${vuln}</div>`);
           }
         });
-        if (!foundVuln) {
-          lines.push(
-            `<div class="console-line">None detected. (Pure bruteforce)</div>`,
-          );
-        } else if (inCommonPasswords) {
-          lines.push(`<div class="console-line"><br/></div>`);
-          lines.push(
-            `<div class="console-line">Danger: Base password found in top-passwords lists</div>`,
-          );
-        }
       }
 
       consoleBody.innerHTML = lines.join("");
@@ -294,7 +267,7 @@ function initPassphraseInput(): void {
     if (counter) counter.textContent = hasContent ? ` (${len})` : "";
     if (clearBtn) clearBtn.hidden = !hasContent;
 
-    const invalidChar = textarea.value.match(/[^\x20-\x7E]/)?.[0];
+    const invalidChar = getFirstInvalidEngineChar(textarea.value);
 
     if (copyBtn) {
       if (invalidChar) {
@@ -334,8 +307,6 @@ function initPassphraseInput(): void {
       resetCrackTimeBadge();
       ConsoleManager.getInstance().setState("idle");
     }
-
-    adjustHeight();
   });
 
   if (copyBtn) {
@@ -370,6 +341,9 @@ function initLengthInputOptions(): void {
   const formatSelect = document.getElementById(
     "generator-format",
   ) as HTMLSelectElement | null;
+  const hashSelect = document.getElementById(
+    "hash-algorithm",
+  ) as HTMLSelectElement | null;
   const titleLabel = document.getElementById("length-title-label");
   const input = document.getElementById(
     "length-input",
@@ -377,32 +351,32 @@ function initLengthInputOptions(): void {
   const btnDec = document.getElementById("length-decrease");
   const btnInc = document.getElementById("length-increase");
 
-  if (!formatSelect || !titleLabel || !input || !btnDec || !btnInc) return;
-
-  const updateFormatBounds = () => {
-    const isDiceware = formatSelect.value === "diceware";
-    titleLabel.textContent = isDiceware
-      ? "Number of words:"
-      : "Number of characters:";
-
-    if (isDiceware) {
-      input.value = "5";
-    } else {
-      input.value = "14";
-    }
-  };
-
-  formatSelect.addEventListener("change", updateFormatBounds);
+  if (
+    !formatSelect ||
+    !hashSelect ||
+    !titleLabel ||
+    !input ||
+    !btnDec ||
+    !btnInc
+  )
+    return;
 
   const enforceBounds = () => {
     let num = parseInt(input.value, 10);
-    if (isNaN(num)) num = formatSelect.value === "diceware" ? 5 : 14;
+    if (isNaN(num)) num = 14;
 
-    const max = formatSelect.value === "diceware" ? 20 : 128;
-    const min = 1;
+    let max = 128;
+    if (hashSelect.value === "bcrypt") {
+      max = 72;
+    }
+    const min = formatSelect.value === "diceware" ? 3 : 1;
 
     input.value = String(Math.min(Math.max(num, min), max));
   };
+
+  formatSelect.addEventListener("change", enforceBounds);
+
+  hashSelect.addEventListener("change", enforceBounds);
 
   input.addEventListener("beforeinput", (e: InputEvent) => {
     if (e.data && !/^[0-9]+$/.test(e.data)) e.preventDefault();
@@ -650,20 +624,12 @@ function updateCrackTimeBadge(guesses: number, algo: Algorithm): void {
   if (!badge) return;
   badge.classList.remove("badge-low", "badge-medium", "badge-high");
 
-  const crackTime = calculateCrackTime(guesses, "supercomputer", algo);
+  const grade = evaluateResistanceGrade(guesses, algo);
+  badge.textContent = grade;
 
-  // 1 Year threshold = 31,536,000 seconds
-  // 1 Century threshold = 3,153,600,000 seconds
-  if (crackTime < 31536000) {
-    badge.textContent = "Low";
-    badge.classList.add("badge-low");
-  } else if (crackTime < 3153600000) {
-    badge.textContent = "Medium";
-    badge.classList.add("badge-medium");
-  } else {
-    badge.textContent = "High";
-    badge.classList.add("badge-high");
-  }
+  if (grade === "Low") badge.classList.add("badge-low");
+  else if (grade === "Medium") badge.classList.add("badge-medium");
+  else if (grade === "High") badge.classList.add("badge-high");
 }
 
 function resetCrackTimeBadge(): void {
@@ -723,6 +689,9 @@ function initGenerateButton(): void {
   }
 
   generateBtn.addEventListener("click", async () => {
+    clearTimeout(evaluateTimeout);
+    cancelPendingEvaluations();
+
     const originalBtnText = generateBtn.innerHTML;
     textarea.classList.add("is-generating");
     generateBtn.disabled = true;
@@ -782,82 +751,25 @@ function initGenerateButton(): void {
       vulnerabilities: [],
     });
 
-    let finalPassphrase = "";
-    let finalResult: any = null;
-
-    let attempts = 0;
-    const maxAttempts = 100;
-
-    let candidate =
-      format === "ascii"
-        ? generateAscii(currentLength, asciiPool)
-        : generateDiceware(currentLength, dicewareSeparator);
-
-    while (attempts < maxAttempts) {
-      let hasVulnerability = false;
-      let currentResult: any = null;
-
-      if (format === "ascii") {
-        currentResult = await evaluatePassword(candidate, algo, true);
-        if (!currentResult) break;
-
-        if (currentResult.sequence) {
-          const badIndices = new Set<number>();
-
-          currentResult.sequence.forEach((match: any) => {
-            if (match.pattern !== "bruteforce") {
-              for (let idx = match.i; idx <= match.j; idx++) {
-                badIndices.add(idx);
-              }
-            }
-          });
-
-          if (badIndices.size > 0) {
-            hasVulnerability = true;
-
-            const detectedPatterns = Array.from(
-              new Set(
-                currentResult.sequence
-                  .filter((m: any) => m.pattern !== "bruteforce")
-                  .map((m: any) =>
-                    m.pattern === "dictionary"
-                      ? `${m.dictionaryName || "unknown"} dictionary`
-                      : m.pattern,
-                  ),
-              ),
-            );
-            ConsoleManager.getInstance().setState("processing_generation", {
-              attempt: attempts + 1,
-              vulnerabilities: detectedPatterns,
-            });
-
-            const newChars = generateAscii(badIndices.size, asciiPool);
-            const candidateArray = candidate.split("");
-
-            let replaceIdx = 0;
-            badIndices.forEach((idx) => {
-              candidateArray[idx] = newChars[replaceIdx];
-              replaceIdx++;
-            });
-
-            candidate = candidateArray.join("");
-          }
-        }
-      }
-
-      if (!hasVulnerability) {
-        finalPassphrase = candidate;
-        finalResult = await evaluatePassword(candidate, algo, false);
-        break;
-      }
-
-      attempts++;
-    }
-
-    if (!finalPassphrase && attempts >= maxAttempts) {
-      finalPassphrase = candidate;
-      finalResult = await evaluatePassword(candidate, algo);
-    }
+    const {
+      passphrase: finalPassphrase,
+      result: finalResult,
+      attempts,
+    } = await generateSecurePassphrase(
+      {
+        format,
+        length: currentLength,
+        algo,
+        asciiPool,
+        dicewareSeparator,
+      },
+      (attempt, vulnerabilities) => {
+        ConsoleManager.getInstance().setState("processing_generation", {
+          attempt,
+          vulnerabilities,
+        });
+      },
+    );
 
     generateBtn.innerHTML = originalBtnText;
     generateBtn.disabled = false;
@@ -920,12 +832,12 @@ function initDynamicFormatOptionsInteractivity(): void {
 
   if (separatorInput) {
     separatorInput.addEventListener("beforeinput", (e: InputEvent) => {
-      if (e.data && !/^[\x20-\x7E]$/.test(e.data)) e.preventDefault();
+      if (e.data && !isValidEngineChar(e.data)) e.preventDefault();
     });
     separatorInput.addEventListener("input", () => {
-      separatorInput.value = separatorInput.value
-        .replace(/[^\x20-\x7E]/g, "")
-        .slice(-1);
+      separatorInput.value = sanitizeEngineInput(separatorInput.value).slice(
+        -1,
+      );
     });
     separatorInput.addEventListener("blur", () => {
       if (!separatorInput.value) separatorInput.value = " ";
