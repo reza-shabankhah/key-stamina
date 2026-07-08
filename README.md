@@ -6,7 +6,7 @@
 
 <br>
 
-<video src="https://github.com/reza-shabankhah/KeyStamina/raw/main/.github/assets/demo.mp4" width="100%" autoplay loop muted playsinline></video>
+<video src="https://github.com/user-attachments/assets/c442bb12-10c3-4fe6-8cfb-3380e24d6977" width="100%" autoplay loop muted playsinline></video>
 </div>
 <br>
 
