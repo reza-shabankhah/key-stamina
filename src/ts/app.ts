@@ -86,10 +86,13 @@ class ConsoleManager {
 
     const checkScrollFade = () => {
       if (!consoleCard) return;
-      const isScrollable =
+      const isScrollableBottom =
         consoleBody.scrollHeight - consoleBody.scrollTop >
         consoleBody.clientHeight + 2;
-      consoleCard.classList.toggle("is-scrollable", isScrollable);
+      const isScrollableTop = consoleBody.scrollTop > 2;
+
+      consoleCard.classList.toggle("is-scrollable", isScrollableBottom);
+      consoleCard.classList.toggle("is-scrollable-top", isScrollableTop);
     };
 
     if (!consoleBody.hasAttribute("data-scroll-listener")) {
@@ -97,6 +100,10 @@ class ConsoleManager {
         passive: true,
       });
       window.addEventListener("resize", checkScrollFade, { passive: true });
+      
+      const observer = new ResizeObserver(() => checkScrollFade());
+      observer.observe(consoleBody);
+
       consoleBody.setAttribute("data-scroll-listener", "true");
     }
 
@@ -831,13 +838,18 @@ function initDynamicFormatOptionsInteractivity(): void {
   }
 
   if (separatorInput) {
-    separatorInput.addEventListener("beforeinput", (e: InputEvent) => {
-      if (e.data && !isValidEngineChar(e.data)) e.preventDefault();
+    separatorInput.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key.length === 1) {
+        e.preventDefault();
+        if (isValidEngineChar(e.key)) {
+          separatorInput.value = e.key;
+          separatorInput.dispatchEvent(new Event("input"));
+        }
+      }
     });
     separatorInput.addEventListener("input", () => {
-      separatorInput.value = sanitizeEngineInput(separatorInput.value).slice(
-        -1,
-      );
+      separatorInput.value = sanitizeEngineInput(separatorInput.value).slice(-1);
     });
     separatorInput.addEventListener("blur", () => {
       if (!separatorInput.value) separatorInput.value = " ";

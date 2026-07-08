@@ -461,11 +461,17 @@ export async function generateSecurePassphrase(
       if (!currentResult) break;
 
       if (currentResult.sequence) {
-        const hasBadPattern = currentResult.sequence.some(
-          (m: any) => m.pattern !== "bruteforce",
-        );
+        const badIndices = new Set<number>();
 
-        if (hasBadPattern) {
+        currentResult.sequence.forEach((match: any) => {
+          if (match.pattern !== "bruteforce") {
+            for (let idx = match.i; idx <= match.j; idx++) {
+              badIndices.add(idx);
+            }
+          }
+        });
+
+        if (badIndices.size > 0) {
           hasVulnerability = true;
 
           const detectedPatterns = Array.from(
@@ -484,7 +490,16 @@ export async function generateSecurePassphrase(
             onProgress(attempts + 1, detectedPatterns);
           }
 
-          candidate = generateAscii(config.length, config.asciiPool);
+          const newChars = generateAscii(badIndices.size, config.asciiPool);
+          const candidateArray = candidate.split("");
+
+          let replaceIdx = 0;
+          badIndices.forEach((idx) => {
+            candidateArray[idx] = newChars[replaceIdx];
+            replaceIdx++;
+          });
+
+          candidate = candidateArray.join("");
         }
       }
     }

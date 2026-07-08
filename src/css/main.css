@@ -808,14 +808,14 @@ textarea {
 }
 
 .passphrase-textarea.is-generating ~ .floating-label .label-prefix,
-.passphrase-border-box:focus-within .floating-label .label-prefix,
+.passphrase-textarea:focus ~ .floating-label .label-prefix,
 .passphrase-textarea:not(:placeholder-shown) ~ .floating-label .label-prefix {
   opacity: 0;
   max-width: 0;
 }
 
 .passphrase-textarea.is-generating ~ .floating-label,
-.passphrase-border-box:focus-within .floating-label,
+.passphrase-textarea:focus ~ .floating-label,
 .passphrase-textarea:not(:placeholder-shown) ~ .floating-label {
   transform: translate(0px, -27px) scale(0.75);
   color: var(--accent-neon);
@@ -830,7 +830,7 @@ textarea {
 }
 
 .passphrase-textarea.is-generating ~ .floating-label .char-counter-badge,
-.passphrase-border-box:focus-within .floating-label .char-counter-badge,
+.passphrase-textarea:focus ~ .floating-label .char-counter-badge,
 .passphrase-textarea:not(:placeholder-shown)
   ~ .floating-label
   .char-counter-badge {
@@ -1181,6 +1181,24 @@ textarea {
   cursor: default;
   position: relative;
   isolation: isolate;
+}
+
+.console-card::before {
+  content: "";
+  position: absolute;
+  top: 2.75rem;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 1), transparent);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: 10;
+}
+
+.console-card.is-scrollable-top::before {
+  opacity: 1;
 }
 
 .console-card::after {
