@@ -3,6 +3,10 @@
 # KeyStamina
 
 **A UI-focused, browser-based sandbox for exploring password cryptography and entropy.**
+
+<br>
+
+<video src=".github/assets/demo.mp4" width="100%" autoplay loop muted playsinline></video>
 </div>
 <br>
 
