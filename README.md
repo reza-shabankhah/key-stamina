@@ -2,8 +2,7 @@
 
 # KeyStamina
 
-**A UI-focused, browser-based sandbox for exploring password cryptography and entropy.**
-
+**A zero-dependency, browser-based sandbox for testing password entropy.**
 <br>
 <video src="https://github.com/user-attachments/assets/70bf0f86-7200-49a4-aacf-0d2ca548d2f8" controls="controls" width="100%"></video>
 </div>
@@ -13,15 +12,21 @@
 
 KeyStamina is an interactive showcase project designed to bridge the gap between abstract cryptography mathematics and premium, intuitive user experience design. It provides a real-time, highly visual environment for modeling password permutation pools, calculating Shannon Entropy, and estimating brute-force vulnerability times across modern hardware architectures.
 
-While the mathematics driving the estimations are highly accurate and rooted in modern security baselines, the primary focus of KeyStamina is delivering a flawless, premium user experience. The tool runs entirely within the client boundary with zero external network dependencies, proving that high-performance, secure applications can also be visually stunning.
+While the mathematics driving the estimations are highly accurate and rooted in modern security baselines, the primary focus of KeyStamina is delivering a flawless, premium user experience. The application runs entirely within the client boundary with zero external network dependencies. Even when accessed via the web-hosted Live Demo, all cryptographic computations execute 100% offline within your browser's memory—proving that high-performance, secure applications can also be visually stunning.
 
-## Download & Run (Zero Dependencies)
+## Quick Start
 
-I've streamlined the entire project—including all styling, logic, WebAssembly binaries, and dictionaries—into a single, portable HTML file that's ready to use straight out of the box.
+Because KeyStamina is designed as a secure cryptographic tool, there are two distinct ways to run it depending on your security needs:
 
-**[Download KeyStamina-Portable.html (Latest)](https://github.com/reza-shabankhah/KeyStamina/releases/latest/download/KeyStamina-Portable.html)**
+### Option A: Air-Gapped Portable Build (Recommended)
+I have streamlined the entire project—including all styling, logic, WebAssembly binaries, and dictionaries—into a single, portable HTML file. It requires no installation, no server, and works perfectly in offline or strictly air-gapped environments.
 
-Simply download the file using the link above and open it in any modern web browser. It requires no installation, no server, and works perfectly in air-gapped or offline environments.
+**[Download KeyStamina-Portable.html (Latest)](https://github.com/reza-shabankhah/key-stamina/releases/latest/download/KeyStamina-Portable.html)**
+
+### Option B: Web-Hosted Live Demo
+If you simply want to explore the UI and test the permutation pools without downloading a file, you can use the web-hosted version. Even when accessed via the web, all cryptographic computations execute 100% offline within your browser's memory.
+
+**[Launch Live Demo](https://reza-shabankhah.github.io/key-stamina/)**
 
 ---
 
