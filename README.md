@@ -5,8 +5,7 @@
 **A UI-focused, browser-based sandbox for exploring password cryptography and entropy.**
 
 <br>
-
-<video src="https://github.com/user-attachments/assets/c442bb12-10c3-4fe6-8cfb-3380e24d6977" width="100%" autoplay loop muted playsinline></video>
+<video src="https://github.com/user-attachments/assets/70bf0f86-7200-49a4-aacf-0d2ca548d2f8" controls="controls" width="100%"></video>
 </div>
 <br>
 
