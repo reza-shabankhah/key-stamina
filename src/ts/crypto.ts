@@ -22,7 +22,7 @@ export const KDF_ARGON2_MEM = 65536;
 export const KDF_ARGON2_ITER = 3;
 export const KDF_ARGON2_PARALLELISM = 1;
 
-// Algorithm Cost Assumptions (OWASP 2026 Minimums):
+// Algorithm Cost Assumptions (OWASP Recommended Minimums):
 export const ALGO_KDF_PARAMS: Record<Algorithm, string> = {
   md5: "raw",
   sha256: "raw",
@@ -32,40 +32,42 @@ export const ALGO_KDF_PARAMS: Record<Algorithm, string> = {
 };
 
 export const HASH_RATES: Record<HardwareTier, Record<Algorithm, number>> = {
-  //~2 GH/s MD5 / ~200 MH/s SHA-256 (Intel UHD 770 / AMD Vega 8)
+  // iGPU Baseline (Intel UHD 770 / AMD Vega 8) + CPU fallback for memory-hard KDFs
+  // Sources: TechPowerUp UHD 770 spec (32 EUs), hashcat forum iGPU reports
   laptop: {
-    md5: 2e9,
-    sha256: 2e8,
-    pbkdf2: 200,
-    bcrypt: 50,
-    argon2id: 20,
+    md5: 1e9, // ~1 GH/s (iGPU, shared system memory bandwidth)
+    sha256: 1.5e8, // ~150 MH/s (iGPU)
+    pbkdf2: 100, // CPU fallback: ~150M raw SHA-256 / 600,000 iter ≈ 250, conservative ~100
+    bcrypt: 100, // CPU fallback: ~3,200 H/s @ cost 5 ÷ 32 = ~100 H/s @ cost 10
+    argon2id: 2, // CPU-bound, m=64MiB per attempt severely limits throughput
   },
 
-  // 1x RTX 5090 (Optimized kernels: -O)
+  // 1x RTX 4090 class GPU
+  // Source: Chick3nman Hashcat v6.2.6 Benchmark Gist (hand-optimized kernels)
   pc: {
-    md5: 2.4e11, // 240 GH/s
-    sha256: 1.0e11, // 100 GH/s
-    pbkdf2: 1.2e6, // 1.2 MH/s
-    bcrypt: 8.8e4, // 88 kH/s
-    argon2id: 1500, // 1.5 kH/s
+    md5: 1.64e11, // 164.1 GH/s — Chick3nman Gist, Mode 0
+    sha256: 2.27e10, // 22,685 MH/s ≈ 22.7 GH/s — Chick3nman Gist, Mode 1400
+    pbkdf2: 15000, // Gist: 8,866 kH/s @ 999 iter → 8,866,000 × (999/600,000) ≈ 14,762 → ~15 kH/s
+    bcrypt: 5750, // Gist: 184 kH/s @ cost 5 → 184,000 / 32 = 5,750 H/s @ cost 10
+    argon2id: 30, // Conservative estimate: m=64MiB forces VRAM-bandwidth throttle; Chick3nman gist has no Argon2id mode
   },
 
-  // 8x RTX 5090 cluster
+  // 8x RTX 4090 cluster
   server: {
-    md5: 1.92e12,
-    sha256: 8.0e11,
-    pbkdf2: 9.6e6,
-    bcrypt: 7.04e5,
-    argon2id: 12000,
+    md5: 1.31e12, // 8 × 164 GH/s
+    sha256: 1.82e11, // 8 × 22.7 GH/s
+    pbkdf2: 120000, // 8 × 15,000
+    bcrypt: 46000, // 8 × 5,750
+    argon2id: 240, // 8 × 30
   },
 
-  // 1,000x RTX 5090 node equivalent
+  // 1,000x RTX 4090 node equivalent
   supercomputer: {
-    md5: 2.4e14,
-    sha256: 1.0e14,
-    pbkdf2: 1.2e9,
-    bcrypt: 8.8e7,
-    argon2id: 1.5e6,
+    md5: 1.64e14, // 1,000 × 164 GH/s
+    sha256: 2.27e13, // 1,000 × 22.7 GH/s
+    pbkdf2: 1.5e7, // 1,000 × 15,000
+    bcrypt: 5.75e6, // 1,000 × 5,750
+    argon2id: 30000, // 1,000 × 30
   },
 };
 
